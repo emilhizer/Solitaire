@@ -40,12 +40,15 @@ class Card: SKSpriteNode {
   var value: Int
   var facing: CardFacing = .Front
   
+  var pileNumber: Int?
+  var isTopOfWaste = false
+
   private var frontBackground: SKTexture
   private var frontTexture: SKTexture
   private var backTexture: SKTexture
   
   private var frontFaceNode: SKSpriteNode!
-  private let frontFaceScale = CGFloat(0.98)
+  private let frontFaceScale = CGFloat(0.95)
   
   // MARK: - Init
   required init(coder aDecoder: NSCoder) {
@@ -63,6 +66,8 @@ class Card: SKSpriteNode {
     super.init(texture: self.frontBackground,
                color: .clear,
                size: self.frontBackground.size())
+    
+    name = "\(value) of \(suit)"
     
     frontFaceNode = SKSpriteNode(texture: frontTexture)
     frontFaceNode.size = CGSize(width: size.width * frontFaceScale,
@@ -82,7 +87,22 @@ class Card: SKSpriteNode {
                                 height: newSize.height * frontFaceScale)
   } // setSize
   
-  func flipOver(withAnimation: Bool = false) {
+  func flipOver(withAnimation doAnim: Bool = false, animSpeed: TimeInterval = 0.1) {
+    if doAnim {
+      let flipHalfway = SKAction.scaleX(to: 0, y: 1, duration: animSpeed)
+      flipHalfway.timingMode = .easeIn
+      let doAction = SKAction.run {
+        self.flipCard()
+      }
+      let flipToFull = SKAction.scaleX(to: 1, y: 1, duration: animSpeed)
+      flipToFull.timingMode = .easeOut
+      run(SKAction.sequence([flipHalfway, doAction, flipToFull]))
+    } else {
+      flipCard()
+    }
+  } // flipOver
+  
+  private func flipCard() {
     if facing == .Front {
       facing = .Back
       frontFaceNode.alpha = 0
@@ -92,7 +112,7 @@ class Card: SKSpriteNode {
       frontFaceNode.alpha = 1
       texture! = frontBackground
     }
-  } // flipOver
+  } // private: flipCard
   
   func faceDown() {
     if facing != .Back {
@@ -110,6 +130,10 @@ class Card: SKSpriteNode {
     }
   } // faceUp
 
+  func animate(toPos pos: CGPoint, duration: TimeInterval) {
+    let moveAnim = SKAction.move(to: pos, duration: duration)
+    run(moveAnim)
+  }
   
   
   // MARK: - Class Functions
@@ -121,13 +145,11 @@ class Card: SKSpriteNode {
     while notAtTopNode {
       // Card found?
       if let card = currentNode as? Card {
-        print("Found Card: \(card)")
-        print(" -- Card suit: \(card.suit); value: \(card.value); facing: \(card.facing)")
+        print("Found Card: \(card.suit); value: \(card.value); facing: \(card.facing)")
         return card
       } else {
         if let parentNode = currentNode.parent {
           currentNode = parentNode
-          print("Stepping up through node tree, current node: \(currentNode)")
         } else {
           notAtTopNode = false
         }

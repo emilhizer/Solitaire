@@ -21,7 +21,8 @@
 		0F4255A92015AB410071BA41 /* GameScene+PropertyLists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4255A82015AB410071BA41 /* GameScene+PropertyLists.swift */; };
 		0F6D088D201CD223000D56DC /* GameScen+Touches.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6D088C201CD223000D56DC /* GameScen+Touches.swift */; };
 		0F6D088F201CE1F5000D56DC /* Tableau.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6D088E201CE1F5000D56DC /* Tableau.swift */; };
-		0F6D0891201CE517000D56DC /* Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6D0890201CE517000D56DC /* Foundation.swift */; };
+		0F6D0891201CE517000D56DC /* CardFoundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6D0890201CE517000D56DC /* CardFoundation.swift */; };
+		0F6D0893201D38C6000D56DC /* GameScene+GamePlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6D0892201D38C6000D56DC /* GameScene+GamePlay.swift */; };
 		0FE151732016EE2500FC8D2A /* CardDeck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE151722016EE2500FC8D2A /* CardDeck.swift */; };
 		0FE151832016F46D00FC8D2A /* SKNode+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE151772016F46B00FC8D2A /* SKNode+Extensions.swift */; };
 		0FE151842016F46D00FC8D2A /* SKAction+SpecialEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE151782016F46C00FC8D2A /* SKAction+SpecialEffects.swift */; };
@@ -54,7 +55,8 @@
 		0F4255A82015AB410071BA41 /* GameScene+PropertyLists.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+PropertyLists.swift"; sourceTree = "<group>"; };
 		0F6D088C201CD223000D56DC /* GameScen+Touches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScen+Touches.swift"; sourceTree = "<group>"; };
 		0F6D088E201CE1F5000D56DC /* Tableau.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tableau.swift; sourceTree = "<group>"; };
-		0F6D0890201CE517000D56DC /* Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Foundation.swift; sourceTree = "<group>"; };
+		0F6D0890201CE517000D56DC /* CardFoundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardFoundation.swift; sourceTree = "<group>"; };
+		0F6D0892201D38C6000D56DC /* GameScene+GamePlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+GamePlay.swift"; sourceTree = "<group>"; };
 		0FE151722016EE2500FC8D2A /* CardDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDeck.swift; sourceTree = "<group>"; };
 		0FE151772016F46B00FC8D2A /* SKNode+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SKNode+Extensions.swift"; sourceTree = "<group>"; };
 		0FE151782016F46C00FC8D2A /* SKAction+SpecialEffects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SKAction+SpecialEffects.swift"; sourceTree = "<group>"; };
@@ -104,8 +106,9 @@
 				0F425568201573420071BA41 /* GameScene.swift */,
 				0F42557F201597D40071BA41 /* Card.swift */,
 				0F6D088E201CE1F5000D56DC /* Tableau.swift */,
-				0F6D0890201CE517000D56DC /* Foundation.swift */,
+				0F6D0890201CE517000D56DC /* CardFoundation.swift */,
 				0FE151722016EE2500FC8D2A /* CardDeck.swift */,
+				0F6D0892201D38C6000D56DC /* GameScene+GamePlay.swift */,
 				0F6D088C201CD223000D56DC /* GameScen+Touches.swift */,
 				0F4255A82015AB410071BA41 /* GameScene+PropertyLists.swift */,
 				0F42557C201576EA0071BA41 /* Assets */,
@@ -255,7 +258,7 @@
 				0FE1518A2016F46D00FC8D2A /* CGFloat+Extensions.swift in Sources */,
 				0F6D088D201CD223000D56DC /* GameScen+Touches.swift in Sources */,
 				0FE151732016EE2500FC8D2A /* CardDeck.swift in Sources */,
-				0F6D0891201CE517000D56DC /* Foundation.swift in Sources */,
+				0F6D0891201CE517000D56DC /* CardFoundation.swift in Sources */,
 				0FE151882016F46D00FC8D2A /* SKAction+Extensions.swift in Sources */,
 				0FE151892016F46D00FC8D2A /* SKTAudio.swift in Sources */,
 				0F425569201573420071BA41 /* GameScene.swift in Sources */,
@@ -267,6 +270,7 @@
 				0F425563201573420071BA41 /* AppDelegate.swift in Sources */,
 				0F425580201597D40071BA41 /* Card.swift in Sources */,
 				0FE1518D2016F46D00FC8D2A /* SKTEffects.swift in Sources */,
+				0F6D0893201D38C6000D56DC /* GameScene+GamePlay.swift in Sources */,
 				0FE1518E2016F46D00FC8D2A /* Vector3.swift in Sources */,
 				0F6D088F201CE1F5000D56DC /* Tableau.swift in Sources */,
 				0FE151862016F46D00FC8D2A /* Int+Extensions.swift in Sources */,

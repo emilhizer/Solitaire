@@ -16,7 +16,7 @@ class GameScene: SKScene {
   var cardDecks = [String: CardDeck]()
   var currentDeck: CardDeck!
   var tableaus = [Tableau]()
-  var foundations = [[Card]]()
+  var cardFoundations = [CardFoundation]()
   var stock = [Card]()
   var waste = [Card]()
   
@@ -25,28 +25,36 @@ class GameScene: SKScene {
   var feltImage = "Feltr2"
   var cardBackImage = "CardBackNU"
   var cardPadPercent = CGFloat(0.1)
-  var cardPadding = CGFloat(0)
+  var cardHSpacing = CGFloat(0)
+  var cardVSpacing = CGFloat(0)
   var cardScale = CGFloat(0)
   var cardSize = CGSize.zero
-  var cardsAcross = CGFloat(7)
+  var cardsAcross = 7
   var dealerPosition = CGPoint.zero
-  var tableauStartLocation = CGPoint.zero
-  var tableauHiddenVertSpacing = CGFloat(0.15)
-  var tableauStackVertSpacing = CGFloat(0.20)
-  var foundationStartLocation = CGPoint.zero
   var stockLocation = CGPoint.zero
   var wasteLocation = CGPoint.zero
   var wasteHorizSpacing = CGFloat(0.20)
+  var cardAnimSpeed = TimeInterval(0.1)
+  var doCardFlipAnim = true
 
-  
-  // Game Play
+  // Game Control
   enum GameState: Int {
     case Starting = 0
     case Dealing
     case Playing
+    case Animating
     case Ending
   }
   var gameState: GameState = .Starting
+  
+  // +GamePlay
+  var firstTouchPos = CGPoint.zero
+  var lastTouchPos = CGPoint.zero
+  var touchStarted = TimeInterval(0)
+  var cardTouched: Card?
+  var cardsInMotion = [Card]()
+  var cardsMovedFromTableauNo: Int?
+
   
   // MARK: - Init and Setup
   override func didMove(to view: SKView) {
@@ -93,7 +101,7 @@ class GameScene: SKScene {
   func setupCardLocations() {
     if let cardWidth = currentDeck.cardWidth,
       let cardHeight = currentDeck.cardHeight {
-      let cardsAcrossWidth = cardsAcross * cardWidth
+      let cardsAcrossWidth = CGFloat(cardsAcross) * cardWidth
       cardScale = (size.width * (1-cardPadPercent)) / cardsAcrossWidth
       cardSize = CGSize(width: cardWidth * cardScale,
                         height: cardHeight * cardScale)
@@ -101,21 +109,51 @@ class GameScene: SKScene {
       fatalError("Card width/heigh not found")
     }
 
-    cardPadding = (size.width * cardPadPercent) / (cardsAcross + 1)
+    cardHSpacing = (size.width * cardPadPercent) / (CGFloat(cardsAcross) + 1)
+    cardVSpacing = cardSize.height * 0.2
     
-    tableauStartLocation.x = -(size.width / 2) + cardPadding + (cardSize.width / 2)
-    tableauStartLocation.y = size.height * (1/4)
+    var tableauX = -(size.width / 2) + cardHSpacing + (cardSize.width / 2)
+    let tableauY = size.height * (1/4)
+    for _ in 0..<cardsAcross {
+      let basePosition = CGPoint(x: tableauX, y: tableauY)
+      let newTableau = Tableau(basePosition: basePosition,
+                               cardSpacing: cardVSpacing)
+      let emptySlot = create(emptySlotSprite: "EmptySlot",
+                                     withSize: cardSize,
+                                     andPosition: basePosition)
+      addChild(emptySlot)
+      tableaus.append(newTableau)
+      tableauX += cardSize.width + cardHSpacing
+    }
 
-    foundationStartLocation.x = tableauStartLocation.x
-    foundationStartLocation.y = (size.height / 2) - cardSize.height
+    var foundationX = tableaus[0].basePosition.x
+    let foundationY = (size.height / 2) - cardSize.height
+    for _ in 0...3 {
+      let basePosition = CGPoint(x: foundationX, y: foundationY)
+      let emptySlot = create(emptySlotSprite: "EmptySlot",
+                             withSize: cardSize,
+                             andPosition: basePosition)
+      addChild(emptySlot)
+      cardFoundations.append(CardFoundation(basePosition: basePosition))
+      foundationX += cardSize.width + cardHSpacing
+    }
 
-    stockLocation.x = -tableauStartLocation.x
-    stockLocation.y = foundationStartLocation.y
+    stockLocation.x = -tableaus[0].basePosition.x
+    stockLocation.y = cardFoundations[0].basePosition.y
     
     wasteLocation.x = stockLocation.x - (2 * cardSize.width)
-    wasteLocation.y = foundationStartLocation.y
+    wasteLocation.y = cardFoundations[0].basePosition.y
 
   } // setupCardLocations
+  
+  func create(emptySlotSprite imageName: String, withSize emptySlotSize: CGSize, andPosition basePosition: CGPoint) -> SKSpriteNode {
+    let emptySlot = SKSpriteNode(imageNamed: imageName)
+    emptySlot.name = imageName
+    emptySlot.size = emptySlotSize
+    emptySlot.position = basePosition
+    emptySlot.zPosition = -1
+    return emptySlot
+  } // get:emptySlotSprite
   
   func startNewGame() {
     
@@ -127,46 +165,60 @@ class GameScene: SKScene {
   } // startNewGame
   
   func deal() {
-    var cardPosition = tableauStartLocation
-    var cardCount = 0
-    let dealTiming = TimeInterval(0.1)
     
-    for pileCol in 0...6 {
-      cardPosition.x = tableauStartLocation.x + (CGFloat(pileCol) * (cardSize.width + cardPadding))
-      for pileRow in pileCol...6 {
+    var cardCount = 0
+    for tableauRow in 0..<cardsAcross {
+      for tableauCol in tableauRow..<cardsAcross {
         if let card = currentDeck.drawCard() {
-          if pileRow != pileCol { card.flipOver() }
+          if tableauCol != tableauRow { card.flipOver() }
           addChild(card)
           card.setSize(to: cardSize)
-          card.zPosition = 10 + CGFloat(cardCount)
+          card.pileNumber = tableauCol
           card.position = dealerPosition
-          
-          if pileRow == pileCol {
-            tableaus.append(Tableau(pile: .Up, card: card))
-          } else {
-            tableaus[pileCol].addCard(toPile: .Down, card: card)
-          }
+          card.zPosition = 1000
 
-          let wait = SKAction.wait(forDuration: dealTiming * TimeInterval(cardCount))
-          let moveAction = SKAction.move(to: cardPosition, duration: dealTiming)
-          let sequence = SKAction.sequence([wait, moveAction])
-          card.run(sequence)
-        } // card
-        cardPosition.x += cardPadding + cardSize.width
+          let delay = cardAnimSpeed * TimeInterval(cardCount)
+          tableaus[tableauCol].add(card: card,
+                                   withAnimSpeed: cardAnimSpeed,
+                                   delay: delay)
+        } // draw card
         cardCount += 1
-      } // for j
-      cardPosition.y -= cardSize.height * tableauHiddenVertSpacing
-    } // for i
+      } // for tableauCol
+    } // for tableauRow
+
+    // Animate the deal
+    /*
+    var cardCount = 0
+    for tableauRow in 0..<cardsAcross {
+      for tableauCol in tableauRow..<cardsAcross {
+        var card: Card
+        if tableauCol == tableauRow {
+          card = tableaus[tableauCol].pileUp[0]
+        } else {
+          card = tableaus[tableauCol].pileDown[tableauRow]
+        }
+        let cardFinalPosition = card.position
+        card.position = dealerPosition
+        
+        let wait = SKAction.wait(forDuration: cardAnimSpeed * TimeInterval(cardCount))
+        let moveAction = SKAction.move(to: cardFinalPosition, duration: cardAnimSpeed)
+        let sequence = SKAction.sequence([wait, moveAction])
+        card.run(sequence)
+        cardCount += 1
+      } // for tableauCol
+    } // for tableauRow
+    */
     
+    // Setup the Stock pile
     if let card = currentDeck.topCard() {
       card.faceDown()
       card.position = dealerPosition
       card.name = "StockCard"
       card.setSize(to: cardSize)
-      card.zPosition = 100
+      card.zPosition = 1000
       addChild(card)
-      let wait = SKAction.wait(forDuration: dealTiming * TimeInterval(30))
-      let moveAction = SKAction.move(to: stockLocation, duration: dealTiming * 4)
+      let wait = SKAction.wait(forDuration: cardAnimSpeed * TimeInterval(30))
+      let moveAction = SKAction.move(to: stockLocation, duration: cardAnimSpeed * 4)
       let runAction = SKAction.run {
         self.gameState = .Playing
       }

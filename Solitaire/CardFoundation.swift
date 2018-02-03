@@ -1,5 +1,5 @@
 //
-//  Foundation.swift
+//  CardFoundation.swift
 //  Solitaire
 //
 //  Created by Eric Milhizer on 1/27/18.
@@ -7,17 +7,24 @@
 //
 
 import Foundation
+import SpriteKit
 
-class Foundation {
+
+class CardFoundation {
   
   
   // MARK: - Properties
+  var basePosition = CGPoint.zero
   var pile = [Card]()
   
   
   // MARK: - Init
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+  
+  init(basePosition: CGPoint) {
+    self.basePosition = basePosition
   }
   
   
@@ -38,4 +45,4 @@ class Foundation {
   
   
   
-} // Foundation
+} // CardFoundation

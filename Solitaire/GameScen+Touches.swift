@@ -12,33 +12,7 @@ import SpriteKit
 extension GameScene {
   
   
-  // MARK: - Touch Execution
-  func touchDown(atPoint pos : CGPoint) {
-    print("Touch Down")
-    if let firstNode = nodes(at: pos).first {
-      if let card = Card.getCard(fromNode: firstNode) {
-        print("Touched card: \(card)")
-      } else {
-        print("No card touched")
-      }
-    }
-  } // touchDown
-  
-  func touchMoved(toPoint pos : CGPoint) {
-  } // touchMoved
-  
-  func touchUp(atPoint pos : CGPoint) {
-  } // touchUp
-
-  func touchCancelled() {
-    
-  } // touchCancelled
-  
-  
-  
-  
   // MARK: - Touches
-  
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     if gameState == .Playing {
       if let touch = touches.first {
@@ -70,10 +44,6 @@ extension GameScene {
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     touchCancelled()
   } // touchesCancelled
-
-  
-  
-  
   
   
 } // GameScene+Touches
