@@ -26,6 +26,13 @@ enum SuitColor: Int {
   case Red
 }
 
+enum StackType: Int {
+  case Stock
+  case Waste
+  case Tableau
+  case Foundation
+}
+
 class Card: SKSpriteNode {
   
   // MARK: - Properties
@@ -40,7 +47,8 @@ class Card: SKSpriteNode {
   var value: Int
   var facing: CardFacing = .Front
   
-  var pileNumber: Int?
+  var onStack: StackType?
+  var stackNumber: Int?
   var isTopOfWaste = false
 
   private var frontBackground: SKTexture

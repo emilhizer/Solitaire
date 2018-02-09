@@ -59,7 +59,7 @@ class Tableau {
   
   // MARK: - Functions
   
-  func add(card: Card, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
+  func add(card: Card, withWiggle wiggle: Bool = false, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
     let initialPosition = card.position
     var finalPosition = lastPosition
     if !isEmpty {
@@ -85,13 +85,13 @@ class Tableau {
 
   } // add:card
   
-  func add(cards: [Card], withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
+  func add(cards: [Card], withWiggle wiggle: Bool, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
     guard cards.count > 0 else {
       fatalError("No cards provided to add to pile")
     }
     
     for card in cards {
-      add(card: card, withAnimSpeed: animSpeed, delay: delay)
+      add(card: card, withWiggle: wiggle, withAnimSpeed: animSpeed, delay: delay)
     } // loop through all cards
   } // add:cards
 
@@ -118,6 +118,8 @@ class Tableau {
         var returnArray = [Card]()
         for _ in cardIndex..<pileUp.count {
           returnArray.insert(pileUp.popLast()!, at: 0)
+          returnArray[0].onStack = nil
+          returnArray[0].stackNumber = nil
         }
         return returnArray
       } else {
@@ -130,6 +132,8 @@ class Tableau {
         var returnArray = [Card]()
         for _ in cardIndex..<pileDown.count {
           returnArray.insert(pileDown.popLast()!, at: 0)
+          returnArray[0].onStack = nil
+          returnArray[0].stackNumber = nil
         }
         return returnArray
       } else {
@@ -182,9 +186,11 @@ class Tableau {
   } // canMoveHere
   
   func flipLowestDownCard(withAnimation doAnim: Bool = false, animSpeed: TimeInterval = 0) {
-    guard pileUp.count == 0 else {
-      fatalError("Trying to flip down card when up card(s) present")
+    // If moving cards from middle of up pile then don't try to flip down pile card
+    if pileUp.count != 0  {
+      return
     }
+    
     if let poppedCard = pileDown.popLast() {
       poppedCard.flipOver(withAnimation: doAnim, animSpeed: animSpeed)
       pileUp.append(poppedCard)

@@ -15,6 +15,8 @@ extension GameScene {
   // MARK: - Touches
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     if gameState == .Playing {
+      priorGameState = .Playing
+      gameState = .Touching
       if let touch = touches.first {
         touchDown(atPoint: touch.location(in: self))
       }
@@ -22,7 +24,7 @@ extension GameScene {
   } // touchesBegan
   
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if gameState == .Playing {
+    if gameState == .Touching {
       if let touch = touches.first {
         touchMoved(toPoint: touch.location(in: self))
       }
@@ -32,17 +34,19 @@ extension GameScene {
   } // touchesMoved
   
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if gameState == .Playing {
+    if gameState == .Touching {
       if let touch = touches.first {
         touchUp(atPoint: touch.location(in: self))
       }
     } else {
       touchCancelled()
     }
+    gameState = priorGameState
   } // touchesEnded
   
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     touchCancelled()
+    gameState = priorGameState
   } // touchesCancelled
   
   

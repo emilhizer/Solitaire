@@ -59,19 +59,41 @@ class CardDeck {
     print("Deck \(deckName) shuffled")
   } // shuffleDeck
   
-  func drawCard() -> Card? {
-    if unusedCards.count > 0 {
-      let drawnCard = unusedCards.remove(at: 0)
-      usedCards.append(drawnCard)
-      return drawnCard
-    } else {
-      return nil
+  func getCard() -> Card? {
+    if let poppedCard = unusedCards.popLast() {
+      usedCards.append(poppedCard)
+      return poppedCard
     }
+    return nil
   } // drawCard
   
+  func get3Cards() -> [Card]? {
+    var threeCards = [Card]()
+    for _ in 0...2 {
+      if let getCard = getCard() {
+        threeCards.append(getCard)
+      } else {
+        break
+      }
+    } // get (up to) 3 cards
+    return (threeCards.count > 0) ? threeCards : nil
+  } // get3Cards
+  
+  func add(card: Card) {
+    if let foundIndex = usedCards.index(of: card) {
+      usedCards.remove(at: foundIndex)
+      unusedCards.append(card)
+    }
+  } // add:card
+  
+  func add(cards: [Card]) {
+    for card in cards {
+      add(card: card)
+    }
+  } // add:cards
+  
   func topCard() -> Card? {
-    if unusedCards.count > 0 {
-      let card = unusedCards[0]
+    if let card = unusedCards.last {
       return card
     } else {
       return nil

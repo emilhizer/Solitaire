@@ -13,57 +13,37 @@ extension GameScene {
   
   // MARK: - Rules
   func canMove(card: Card) -> Bool {
-    if let _ = card.pileNumber, card.facing == .Front {
-      return true
+    if let stackType = card.onStack {
+      switch stackType {
+      case .Tableau:
+        if let _ = card.stackNumber, card.facing == .Front {
+          return true
+        }
+      case .Foundation:
+        if let _ = card.stackNumber {
+          return true
+        }
+      case .Stock:
+        return true
+      case .Waste:
+        return true
+      }
     }
     return false
   } // canMove:card
   
-  func tableauToStack(card: Card) -> Tableau? {
-    var columnWinner = -1
-    var closestX = CGFloat(99999)
-    let withinDistX = card.size.width / 2
-    let withinDistY = card.size.height
-
-    // Find closest column
-    for i in 0...cardsAcross {
-      let testDist = abs(card.position.x - tableaus[i].basePosition.x)
-      if testDist < closestX {
-        closestX = testDist
-        columnWinner = i
-      } // find a closer match?
-    } // loop through tableaus
-    
-    if closestX <= withinDistX {
-      if card.position.y <= tableaus[columnWinner].basePosition.y + (withinDistY / 2) {
-        if tableaus[columnWinner].pileUp.count == 0 {
-          if card.position.y >= tableaus[columnWinner].basePosition.y - withinDistY {
-            return tableaus[columnWinner]
-          } // empty tableau, card within range
-        } else {
-          let bottomY = tableaus[columnWinner].lastPosition.y
-          if card.position.y >= bottomY - withinDistY {
-            return tableaus[columnWinner]
-          } // tableau with cards, card within range
-        }
-      } // card not too far above tableaus
-    } // x distance is within range
-    
-    return nil
-  } // tableauToStack:card
-
   // MARK: - Pile Movement
   func movePile(withStartingCard card: Card, toPoint pos: CGPoint) {
     
-    if cardsInMotion.count == 0 {
+    if cardsInMotion.cards.count == 0 {
       startMovingCards(startingWithCard: card)
     } // pile now in motion
     
     let dsTouch = pos - lastTouchPos
     lastTouchPos = pos
 
-    if cardsInMotion.count > 0 {
-      for moveCard in cardsInMotion {
+    if cardsInMotion.cards.count > 0 {
+      for moveCard in cardsInMotion.cards {
         moveCard.position += dsTouch
       }
     } else {
@@ -73,54 +53,162 @@ extension GameScene {
   } // movePile
   
   private func startMovingCards(startingWithCard card: Card) {
-    if let pileNo = card.pileNumber,
-      let removedCards = tableaus[pileNo].getCards(fromPile: .Up, startingWith: card) {
-      cardsInMotion = removedCards
-      cardsMovedFromTableauNo = pileNo
+    if let stackType = card.onStack {
+      cardsInMotion.fromStack = stackType
+      cardsInMotion.fromStackNo = card.stackNumber
+      var removedCards = [Card]()
+
+      switch stackType {
+        
+      case .Tableau, .Foundation:
+        guard card.stackNumber != nil else {
+          fatalError("Trying to move card from tableau/foundation, but card has no tableau/foundation number")
+        }
+        if stackType == .Tableau {
+          if let getCards = tableaus[card.stackNumber!].getCards(fromPile: .Up,
+                                                                 startingWith: card) {
+            removedCards = getCards
+          }
+        } else {
+          if let getCard = cardFoundations[card.stackNumber!].getCard() {
+            removedCards = [getCard]
+          }
+        }
+        
+      case .Stock:
+        if let get3Cards = currentDeck.get3Cards() {
+          removedCards = get3Cards
+        } else {
+          fatalError("Moving stock cards when stock card pile is empty")
+        }
+        
+      case .Waste:
+        if let wasteCard = wastePile.getCard() {
+          removedCards = [wasteCard]
+        } else {
+          fatalError("Moving waste card when waste card pile is empty")
+        }
+        
+      } // switch stackType
+
+      for moveCard in removedCards {
+        moveCard.zPosition += 1000
+      }
+      cardsInMotion.cards = removedCards
+
     } else {
-      fatalError("Trying to get/move non-existent card(s) from pile")
+      fatalError("Trying to get/move non-existent card(s)")
     }
-    for moveCard in cardsInMotion {
-      moveCard.zPosition += 1000
-      moveCard.pileNumber = nil
-    }
+    
   } // private: startMovingCards
   
-  func movePile(toTableauNo tableauNo: Int) {
-    guard cardsInMotion.count > 0 else {
-      fatalError("No cards in motion when ending touch")
+  func canMove(toStack stackType: StackType, checkDistance: Bool) -> Int? {
+    switch stackType {
+    case .Foundation:
+      // If more than one card in motion, then can't stack on foundation
+      if cardsInMotion.cards.count != 1 {
+        return nil
+      }
+      for i in 0..<cardFoundations.count {
+        if !((cardsInMotion.fromStack == stackType) && (cardsInMotion.fromStackNo == i)) {
+          if cardFoundations[i].canMoveHere(card: cardsInMotion.cards[0],
+                                            andCheckDistance: checkDistance) {
+            return i
+          }
+        } // not trying to move on top of self
+      }
+    case .Tableau:
+      for i in 0..<tableaus.count {
+        guard cardsInMotion.cards.count > 0 else {
+          fatalError("Evaluating move to tableau w/out any cards")
+        }
+        if !((cardsInMotion.fromStack == stackType) && (cardsInMotion.fromStackNo == i)) {
+          if tableaus[i].canMoveHere(cards: cardsInMotion.cards,
+                                     andCheckDistance: checkDistance) {
+            return i
+          }
+        } // not trying to move on top of self
+      }
+    case .Stock:
+      return nil
+    case .Waste:
+      return nil
     }
-    
-    for card in cardsInMotion {
-      card.pileNumber = tableauNo
-    }
-    tableaus[tableauNo].add(cards: cardsInMotion, withAnimSpeed: cardAnimSpeed)
-    
-    cardsInMotion.removeAll()
-    cardsMovedFromTableauNo = nil
-  } // movePile:toTableau
+    return nil
+  } // canMove:toStack
   
+  func moveCards(toStack stackType: StackType, stackNumber stackNo: Int, withWiggle wiggle: Bool = false) {
+    guard cardsInMotion.cards.count > 0 else {
+      fatalError("No cards in motion when ending touch and trying to add cards to stack")
+    }
+    
+    for card in cardsInMotion.cards {
+      card.onStack = stackType
+      card.stackNumber = stackNo
+    }
+    if stackType == .Tableau {
+      tableaus[stackNo].add(cards: cardsInMotion.cards,
+                            withWiggle: wiggle,
+                            withAnimSpeed: cardAnimSpeed)
+    } else if (stackType == .Foundation) && (cardsInMotion.cards.count == 1) {
+      cardFoundations[stackNo].add(card: cardsInMotion.cards[0],
+                                   withWiggle: wiggle,
+                                   withAnimSpeed: cardAnimSpeed)
+    } else {
+      fatalError("Cannot move cards in motion to final stack")
+    }
+  } // movePile:toTableau:stackNumber
+  
+  /*
+  func moveCards(toStack stackType: StackType, withWiggle wiggle: Bool) {
+    guard cardsInMotion.cards.count > 0 else {
+      fatalError("No cards in motion when ending touch and trying to add cards to stack")
+    }
+    
+    if stackType == .Waste {
+      wastePile.add(cards: cardsInMotion.cards,
+                    withWiggle: wiggle,
+                    withAnimSpeed: cardAnimSpeed)
+    } else {
+      fatalError("Improper function call -- only for Stock to Waste or return to Waste")
+    }
+
+  } // moveCards:toStack
+  */
+  
+  func resetTouches() {
+    cardsInMotion.reset()
+    touchStarted = 0
+    firstTouchPos = CGPoint.zero
+    cardTouched = nil
+  } // resetTouches
+
   
   // MARK: - Touch Execution
   func touchDown(atPoint pos: CGPoint) {
     print("Touch Down")
     if let firstNode = nodes(at: pos).first {
       if let card = Card.getCard(fromNode: firstNode) {
-        print("Touched card: \(card.value) of \(card.suit), facing \(card.facing)")
+        let stackName = (card.onStack != nil) ? "\(card.onStack!)" : "No Stack"
+        print("Touched card: \(card.value) of \(card.suit), facing \(card.facing), from \(stackName)")
         if canMove(card: card) {
           cardTouched = card
           touchStarted = TimeInterval(Date().timeIntervalSince1970)
           firstTouchPos = pos
           lastTouchPos = pos
         }
+      } else if firstNode.name == "StockCardBase" {
+        if let resetWastePile = wastePile.resetPile(toPosition: stockLocation,
+                                                    withAnimSpeed: cardAnimSpeed) {
+          currentDeck.add(cards: resetWastePile)
+        }
       } else {
-        print("No card touched")
+        print("No card or action button touched")
       }
     }
   } // touchDown
   
   func touchMoved(toPoint pos: CGPoint) {
-    print("Touch Moved")
     if let card = cardTouched {
       movePile(withStartingCard: card, toPoint: pos)
     }
@@ -136,48 +224,80 @@ extension GameScene {
       print(" -- Tapped !!!")
       isTapped = true
       if let card = cardTouched {
-        cardsMovedFromTableauNo = card.pileNumber
         startMovingCards(startingWithCard: card)
       } // a valid card was touched
     } // tapped
-
-    touchStarted = 0
-    firstTouchPos = CGPoint.zero
     
-    if let origTableauNo = cardsMovedFromTableauNo {
-      var moveToTableauNo = origTableauNo
-      for i in 0..<tableaus.count {
-        if i != origTableauNo {
-          if tableaus[i].canMoveHere(cards: cardsInMotion, andCheckDistance: !isTapped) {
-            moveToTableauNo = i
-            print("    -- Can move to tableau: \(moveToTableauNo)")
-            break
-          } // found move to tableau
+    if (cardsInMotion.cards.count > 0) {
+      
+      // If moving from Stock, then cards only move to Waste Pile
+      if cardsInMotion.fromStack == .Stock {
+        wastePile.add(cards: cardsInMotion.cards,
+                      withWiggle: isTapped,
+                      withAnimSpeed: cardAnimSpeed)
+      } else {
+      
+        guard ((cardsInMotion.fromStack != nil) &&
+          (cardsInMotion.fromStackNo != nil)) ||
+          (cardsInMotion.fromStack == .Waste)
+        else {
+          fatalError("Cards in motion but not from stack / stack number")
         }
-      } // loop through all tableaus
-      movePile(toTableauNo: moveToTableauNo)
-      if moveToTableauNo != origTableauNo {
-        tableaus[origTableauNo].flipLowestDownCard(withAnimation: doCardFlipAnim,
-                                                   animSpeed: cardAnimSpeed)
-      }
-    } // cards in motion have defined return location
-   
+        
+        // Check if can move cards to foundation
+        if let foundationNo = canMove(toStack: .Foundation, checkDistance: !isTapped) {
+          moveCards(toStack: .Foundation, stackNumber: foundationNo)
+          if cardsInMotion.fromStack! == .Tableau {
+            tableaus[cardsInMotion.fromStackNo!].flipLowestDownCard(withAnimation: doCardFlipAnim,
+                                                                    animSpeed: cardAnimSpeed)
+          }
+          if cardsInMotion.fromStack! == .Waste {
+            wastePile.bumpThreeUp(withAnimSpeed: cardAnimSpeed)
+          }
+        } // can move cards to Foundation
+        
+        // else check if can move cards to tableau
+        else if let tableauNo = canMove(toStack: .Tableau,
+                                        checkDistance: !isTapped) {
+          moveCards(toStack: .Tableau, stackNumber: tableauNo)
+          if cardsInMotion.fromStack! == .Tableau {
+            tableaus[cardsInMotion.fromStackNo!].flipLowestDownCard(withAnimation: doCardFlipAnim,
+                                                                    animSpeed: cardAnimSpeed)
+          }
+          if cardsInMotion.fromStack! == .Waste {
+            wastePile.bumpThreeUp(withAnimSpeed: cardAnimSpeed)
+          }
+        } // can move cards to Tableau
+        
+        // Else move cards back to original location
+        else {
+          if cardsInMotion.fromStack! == .Waste {
+            wastePile.add(cards: cardsInMotion.cards,
+                          withWiggle: isTapped,
+                          withAnimSpeed: cardAnimSpeed)
+          } else {
+            moveCards(toStack: cardsInMotion.fromStack!,
+                      stackNumber: cardsInMotion.fromStackNo!,
+                      withWiggle: isTapped)
+          }
+        }
+      } // Cards in motion not from stock pile
+    } // cards are in motion
     
+    resetTouches()
   } // touchUp
   
   func touchCancelled() {
     print("Touch Cancelled")
-    if let origTableauNo = cardsMovedFromTableauNo {
-      movePile(toTableauNo: origTableauNo)
-    }
-    touchStarted = 0
-    firstTouchPos = CGPoint.zero
-  } // touchCancelled
-  
-  
+    if (cardsInMotion.cards.count > 0) &&
+      !((cardsInMotion.fromStack != nil) && (cardsInMotion.fromStackNo != nil)) {
+      moveCards(toStack: cardsInMotion.fromStack!,
+                stackNumber: cardsInMotion.fromStackNo!)
 
-  
-  
+    }
+    resetTouches()
+  } // touchCancelled
+
   
 } // GameScene+GamePlay
 
