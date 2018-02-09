@@ -80,6 +80,9 @@ class Tableau {
     moveToFinal.timingMode = .easeOut
     let runAfter = SKAction.run {
       card.zPosition = zPositionFinal
+      if wiggle && (card.facing == .Front) {
+        self.wiggleCard(card: card, withAnimSpeed: animSpeed)
+      }
     }
     card.run(SKAction.sequence([moveToStart, delayAction, moveToFinal, runAfter]))
 
@@ -94,6 +97,17 @@ class Tableau {
       add(card: card, withWiggle: wiggle, withAnimSpeed: animSpeed, delay: delay)
     } // loop through all cards
   } // add:cards
+  
+  private func wiggleCard(card: Card, withAnimSpeed animSpeed: TimeInterval = 0) {
+    let origPos = card.position
+    let moveDown = SKAction.moveBy(x: 0,
+                                   y: -card.size.height / 3,
+                                   duration: animSpeed / 2)
+    moveDown.timingMode = .easeOut
+    let moveUp = SKAction.move(to: origPos, duration: animSpeed / 2)
+    moveUp.timingMode = .easeOut
+    card.run(SKAction.sequence([moveDown, moveUp]))
+  } // wiggleTopCard
 
   func getCard(fromPile pile: PileType) -> Card? {
     switch pile {

@@ -36,6 +36,7 @@ class GameScene: SKScene {
   var wasteHorizSpacing = CGFloat(0.20)
   var cardAnimSpeed = TimeInterval(0.1)
   var doCardFlipAnim = true
+  var restartStockPile = SKSpriteNode()
 
   // Game Control
   enum GameState: Int {
@@ -164,10 +165,12 @@ class GameScene: SKScene {
     stockCardBase.zPosition = -10
     addChild(stockCardBase)
     
-    let restartStockPile = SKSpriteNode(imageNamed: "RefreshArrow")
+    restartStockPile = SKSpriteNode(imageNamed: "RefreshArrow")
     restartStockPile.name = "RefreshStockPile"
     restartStockPile.setScale((cardSize.width / restartStockPile.size.width) * 0.70)
     restartStockPile.position = stockLocation
+    restartStockPile.alpha = 0.5
+    restartStockPile.isHidden = true
     restartStockPile.zPosition = -15
     addChild(restartStockPile)
     
@@ -240,13 +243,13 @@ class GameScene: SKScene {
     if let card = currentDeck.topCard() {
       card.isHidden = false
       card.position = dealerPosition
-      print("Top of Current Deck is zPos: \(card.zPosition)")
       let wait = SKAction.wait(forDuration: cardAnimSpeed * TimeInterval(30))
       let moveAction = SKAction.move(to: stockLocation, duration: cardAnimSpeed * 4)
       let runAction = SKAction.run {
         for eachCard in self.currentDeck.unusedCards {
           eachCard.isHidden = false
         }
+        self.restartStockPile.isHidden = false
         self.gameState = .Playing
       }
       let sequence = SKAction.sequence([wait, moveAction, runAction])

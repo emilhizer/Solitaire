@@ -92,7 +92,12 @@ class WastePile {
         }
       }
       let moveCombo = SKAction.group([moveToFinal, runWhileMoving])
-      self.animateCards[i].card.run(SKAction.sequence([moveToStart, delayAction, moveCombo]))
+      let runFinish = SKAction.run {
+        if wiggle {
+          self.wiggleTopCard(withAnimSpeed: animSpeed)
+        }
+      }
+      self.animateCards[i].card.run(SKAction.sequence([moveToStart, delayAction, moveCombo, runFinish]))
     } // loop through (up to 3) cards
     print("Added thee cards to Waste Pile")
   } // add:card
@@ -108,6 +113,19 @@ class WastePile {
     card.position = threeUpPositions[threeUpCards.count]
     threeUpCards.append(card)
   } // addToThreeUp
+  
+  private func wiggleTopCard(withAnimSpeed animSpeed: TimeInterval = 0) {
+    if let wiggleCard = threeUpCards.last {
+      let origPos = wiggleCard.position
+      let moveLeft = SKAction.moveBy(x: -wiggleCard.size.width / 3,
+                                      y: 0,
+                                      duration: animSpeed / 2)
+      moveLeft.timingMode = .easeOut
+      let moveRight = SKAction.move(to: origPos, duration: animSpeed / 2)
+      moveRight.timingMode = .easeOut
+      wiggleCard.run(SKAction.sequence([moveLeft, moveRight]))
+    }
+  } // wiggleTopCard
   
   func bumpThreeUp(withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
     if (pile.count > 2) && (threeUpCards.count == 2) {

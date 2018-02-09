@@ -49,9 +49,25 @@ class CardFoundation {
     moveToFinal.timingMode = .easeOut
     let runAfter = SKAction.run {
       card.zPosition = finalZPosition
+      if wiggle {
+        self.wiggleTopCard(withAnimSpeed: animSpeed)
+      }
     }
     card.run(SKAction.sequence([moveToStart, delayAction, moveToFinal, runAfter]))
   } // add:card
+  
+  private func wiggleTopCard(withAnimSpeed animSpeed: TimeInterval = 0) {
+    if let wiggleCard = pile.last {
+      let origPos = wiggleCard.position
+      let moveDown = SKAction.moveBy(x: 0,
+                                      y: -wiggleCard.size.height / 3,
+                                      duration: animSpeed / 2)
+      moveDown.timingMode = .easeOut
+      let moveUp = SKAction.move(to: origPos, duration: animSpeed / 2)
+      moveUp.timingMode = .easeOut
+      wiggleCard.run(SKAction.sequence([moveDown, moveUp]))
+    }
+  } // wiggleTopCard
 
   func getCard() -> Card? {
     if let poppedCard = pile.popLast() {
