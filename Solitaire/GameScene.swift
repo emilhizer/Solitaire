@@ -249,7 +249,6 @@ class GameScene: SKScene {
         for eachCard in self.currentDeck.unusedCards {
           eachCard.isHidden = false
         }
-        self.restartStockPile.isHidden = false
         self.gameState = .Playing
       }
       let sequence = SKAction.sequence([wait, moveAction, runAction])

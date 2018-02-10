@@ -157,24 +157,33 @@ extension GameScene {
     } else {
       fatalError("Cannot move cards in motion to final stack")
     }
-  } // movePile:toTableau:stackNumber
+  } // movePile:toStack:stackNumber
   
-  /*
-  func moveCards(toStack stackType: StackType, withWiggle wiggle: Bool) {
-    guard cardsInMotion.cards.count > 0 else {
-      fatalError("No cards in motion when ending touch and trying to add cards to stack")
+  func animateRestartArrow() {
+    if restartStockPile.isHidden == false {
+      let rotateAction = SKAction.rotate(byAngle: -2 * π, duration: 60)
+      let fadeOutAction = SKAction.fadeAlpha(by: -0.2, duration: 15)
+      let fadeInAction = SKAction.fadeAlpha(by: 0.2, duration: 15)
+      let fadeSequence = SKAction.sequence([fadeOutAction, fadeInAction, fadeOutAction, fadeInAction])
+      let groupAction = SKAction.group([rotateAction, fadeSequence])
+      let spinForever = SKAction.repeatForever(groupAction)
+      restartStockPile.run(spinForever)
     }
-    
-    if stackType == .Waste {
-      wastePile.add(cards: cardsInMotion.cards,
-                    withWiggle: wiggle,
-                    withAnimSpeed: cardAnimSpeed)
-    } else {
-      fatalError("Improper function call -- only for Stock to Waste or return to Waste")
-    }
+  } // animateRestartArrow
+  
+  func hideRestartArrow() {
+    restartStockPile.removeAllActions()
+    restartStockPile.zRotation = 0
+    restartStockPile.alpha = 0.5
+    restartStockPile.isHidden = true
+  } // hideRestartArrow
 
-  } // moveCards:toStack
-  */
+  func bumpWastePile() {
+    wastePile.bumpThreeUp(withAnimSpeed: cardAnimSpeed)
+    if wastePile.count == 0 {
+      hideRestartArrow()
+    }
+  } // bumpWastePile
   
   func resetTouches() {
     cardsInMotion.reset()
@@ -201,6 +210,7 @@ extension GameScene {
         if let resetWastePile = wastePile.resetPile(toPosition: stockLocation,
                                                     withAnimSpeed: cardAnimSpeed) {
           currentDeck.add(cards: resetWastePile)
+          hideRestartArrow()
         }
       } else {
         print("No card or action button touched")
@@ -235,6 +245,11 @@ extension GameScene {
         wastePile.add(cards: cardsInMotion.cards,
                       withWiggle: isTapped,
                       withAnimSpeed: cardAnimSpeed)
+        if currentDeck.unusedCards.count == 0 {
+          restartStockPile.isHidden = false
+          animateRestartArrow()
+        }
+
       } else {
       
         guard ((cardsInMotion.fromStack != nil) &&
@@ -252,7 +267,7 @@ extension GameScene {
                                                                     animSpeed: cardAnimSpeed)
           }
           if cardsInMotion.fromStack! == .Waste {
-            wastePile.bumpThreeUp(withAnimSpeed: cardAnimSpeed)
+            bumpWastePile()
           }
         } // can move cards to Foundation
         
@@ -265,7 +280,7 @@ extension GameScene {
                                                                     animSpeed: cardAnimSpeed)
           }
           if cardsInMotion.fromStack! == .Waste {
-            wastePile.bumpThreeUp(withAnimSpeed: cardAnimSpeed)
+            bumpWastePile()
           }
         } // can move cards to Tableau
         
