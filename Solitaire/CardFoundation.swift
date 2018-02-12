@@ -31,29 +31,32 @@ class CardFoundation {
   // MARK: - Functions
   
   func add(card: Card, withWiggle wiggle: Bool = false, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
-    let initialPosition = card.position
-    let finalPosition = basePosition
-
-    card.position = finalPosition
+//    let initialPosition = card.position
+//    let finalPosition = basePosition
+//
+//    card.position = finalPosition
 
     var finalZPosition = CGFloat(0)
     if let currentZTop = pile.last?.zPosition {
       finalZPosition = currentZTop + CGFloat(10)
     }
     
-    pile.append(card)
+//    pile.append(card)
     
-    let moveToStart = SKAction.move(to: initialPosition, duration: 0)
+//    let moveToStart = SKAction.move(to: initialPosition, duration: 0)
     let delayAction = SKAction.wait(forDuration: delay)
-    let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
+//    let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
+    let moveToFinal = SKAction.move(to: basePosition, duration: animSpeed)
     moveToFinal.timingMode = .easeOut
     let runAfter = SKAction.run {
       card.zPosition = finalZPosition
+      self.pile.append(card)
       if wiggle {
         self.wiggleTopCard(withAnimSpeed: animSpeed)
       }
     }
-    card.run(SKAction.sequence([moveToStart, delayAction, moveToFinal, runAfter]))
+//    card.run(SKAction.sequence([moveToStart, delayAction, moveToFinal, runAfter]))
+    card.run(SKAction.sequence([delayAction, moveToFinal, runAfter]))
   } // add:card
   
   private func wiggleTopCard(withAnimSpeed animSpeed: TimeInterval = 0) {

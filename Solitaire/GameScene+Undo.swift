@@ -131,14 +131,17 @@ extension GameScene {
         
         // Undo reset waste pile
       case .ResetWastePile:
-        print("ResetWastePile")
+        print("\n ---- ResetWastePile")
         // Undo current deck to waste pile
-        let animTime = cardAnimSpeed / TimeInterval(min(currentDeck.unusedCards.count, 10))
+        var resetWasteCards = [Card]()
         while let card = currentDeck.getCard() {
           card.onStack = .Waste
           card.stackNumber = nil
-          wastePile.add(cards: [card], withAnimSpeed: animTime)
+          resetWasteCards.append(card)
         }
+        wastePile.resetWaste(cards: resetWasteCards,
+                             withAnimSpeed: cardAnimSpeed)
+
         // Show restart arrow
         restartStockPile.isHidden = false
         animateRestartArrow()

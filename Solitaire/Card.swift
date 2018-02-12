@@ -138,11 +138,11 @@ class Card: SKSpriteNode {
     }
   } // faceUp
 
-  func animate(toPos pos: CGPoint, duration: TimeInterval) {
-    let moveAnim = SKAction.move(to: pos, duration: duration)
-    run(moveAnim)
-  }
-  
+//  func animate(toPos pos: CGPoint, duration: TimeInterval) {
+//    let moveAnim = SKAction.move(to: pos, duration: duration)
+//    run(moveAnim)
+//  }
+//  
   
   // MARK: - Class Functions
   static func getCard(fromNode node: SKNode) -> Card? {

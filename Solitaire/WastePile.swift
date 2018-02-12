@@ -54,6 +54,7 @@ class WastePile {
     guard ((cards.count > 0) && (cards.count <= 3)) else {
       fatalError("Can only add between 1 and 3 cards to Waste Pile")
     }
+    print("cards.count: \(cards.count)")
     animateCards.removeAll()
     for card in cards {
       
@@ -138,10 +139,6 @@ class WastePile {
         let delayAction = SKAction.wait(forDuration: finalDelay)
         let moveToFinal = SKAction.move(to: finalPosition, duration: animTime)
         moveToFinal.timingMode = .easeOut
-//        let runFinal = SKAction.run {
-//          self.threeUpCards[i].position = finalPosition
-//        }
-//        threeUpCards[i].run(SKAction.sequence([delayAction, moveToFinal, runFinal]))
         threeUpCards[i].run(SKAction.sequence([delayAction, moveToFinal]))
       } // loop through threeUp cards
     } // proper card config to bump the ThreeUp stack
@@ -201,10 +198,6 @@ class WastePile {
       card.flipOver(withAnimation: true, animSpeed: animSpeed)
     }
     let moveCombo = SKAction.group([moveTo, runWhileMoving])
-//    let runFinal = SKAction.run {
-//      card.position = stockPosition
-//    }
-//    card.run(SKAction.sequence([moveCombo, runFinal]))
     card.run(moveCombo)
   } // returnToStock
   
@@ -232,8 +225,42 @@ class WastePile {
     } else if pile.count == 1 {
       threeUpCards.append(pile[0])
     }
-    
   } // resetThreeUp
+  
+  func resetWaste(cards: [Card], withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
+
+    pile = cards
+    
+    var zPos = baseZPosition
+    for card in cards {
+      card.zPosition = zPos
+      zPos += CGFloat(10)
+    }
+    for card in cards {
+      let delayAction = SKAction.wait(forDuration: delay)
+      let moveAction = SKAction.move(to: basePosition, duration: animSpeed)
+      var groupAction: SKAction
+      if card.facing == .Back {
+        let flipAction = SKAction.run {
+          card.flipOver(withAnimation: true, animSpeed: animSpeed)
+        }
+        groupAction = SKAction.group([moveAction, flipAction])
+      } else {
+        groupAction = moveAction
+      }
+      let finishAction = SKAction.run {
+        card.printCard()
+      }
+      card.run(SKAction.sequence([delayAction, groupAction, finishAction]))
+    } // loop through cards
+    
+    // Wait until reset (anim) is done then reset the three up cards
+    let finalDelay = delay + (2 * animSpeed)
+    resetThreeUp(withAnimSpeed: animSpeed, delay: finalDelay)
+    cards[0].afterDelay(finalDelay + animSpeed) {
+      self.printCards()
+    }
+  } // resetWaste
   
   func printCards() {
     print("\nWaste Pile:")

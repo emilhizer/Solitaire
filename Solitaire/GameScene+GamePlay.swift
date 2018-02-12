@@ -235,7 +235,7 @@ extension GameScene {
     if let firstNode = nodes(at: pos).first {
       if let card = Card.getCard(fromNode: firstNode) {
         let stackName = (card.onStack != nil) ? "\(card.onStack!)" : "No Stack"
-        print("Touched card: \(card.value) of \(card.suit), facing \(card.facing), from \(stackName)")
+        print("Touched card: \(card.getCardString()), from \(stackName)")
         if canMove(card: card) {
           cardTouched = card
           touchStarted = TimeInterval(Date().timeIntervalSince1970)
