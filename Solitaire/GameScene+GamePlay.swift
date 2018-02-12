@@ -24,9 +24,9 @@ extension GameScene {
           return true
         }
       case .Stock:
-        return true
+        return (currentDeck.unusedCards.count > 0) ? true : false
       case .Waste:
-        return true
+        return (wastePile.count > 0) ? true : false
       }
     }
     return false
@@ -47,7 +47,7 @@ extension GameScene {
         moveCard.position += dsTouch
       }
     } else {
-      fatalError("Trying to move pile before its setup")
+      fatalError("Trying to move pile before it's setup")
     } // move those cards
     
   } // movePile
@@ -137,6 +137,7 @@ extension GameScene {
     return nil
   } // canMove:toStack
   
+  // MARK: - Move card to final location
   func moveCards(toStack stackType: StackType, stackNumber stackNo: Int, withWiggle wiggle: Bool = false) {
     guard cardsInMotion.cards.count > 0 else {
       fatalError("No cards in motion when ending touch and trying to add cards to stack")
@@ -150,15 +151,30 @@ extension GameScene {
       tableaus[stackNo].add(cards: cardsInMotion.cards,
                             withWiggle: wiggle,
                             withAnimSpeed: cardAnimSpeed)
+      let playerMove = PlayerMove(playerAction: .MoveCard,
+                                  cards: cardsInMotion.cards,
+                                  fromStack: cardsInMotion.fromStack!,
+                                  fromStackNo: cardsInMotion.fromStackNo,
+                                  toStack: .Tableau,
+                                  toStackNo: stackNo)
+      playerMoves.append(playerMove)
     } else if (stackType == .Foundation) && (cardsInMotion.cards.count == 1) {
       cardFoundations[stackNo].add(card: cardsInMotion.cards[0],
                                    withWiggle: wiggle,
                                    withAnimSpeed: cardAnimSpeed)
+      let playerMove = PlayerMove(playerAction: .MoveCard,
+                                  cards: cardsInMotion.cards,
+                                  fromStack: cardsInMotion.fromStack!,
+                                  fromStackNo: cardsInMotion.fromStackNo,
+                                  toStack: .Foundation,
+                                  toStackNo: stackNo)
+      playerMoves.append(playerMove)
     } else {
       fatalError("Cannot move cards in motion to final stack")
     }
   } // movePile:toStack:stackNumber
   
+  // MARK: - Helpers
   func animateRestartArrow() {
     if restartStockPile.isHidden == false {
       let rotateAction = SKAction.rotate(byAngle: -2 * π, duration: 60)
@@ -190,8 +206,28 @@ extension GameScene {
     touchStarted = 0
     firstTouchPos = CGPoint.zero
     cardTouched = nil
+    printUndoStack()
   } // resetTouches
 
+  func printUndoStack() {
+    print("\n --------")
+    for i in 0..<playerMoves.count {
+      let indexS = String(format: "%02d", i)
+      print("\(indexS): \(playerMoves[i].playerAction)")
+      if let cards = playerMoves[i].cards {
+        if cards.count > 0 {
+          for card in cards {
+            card.printCard()
+          } // loop through cards
+        } else {
+          print(" -- No cards")
+        }
+      } else {
+        print(" -- No cards")
+      }
+    }
+    print(" --------\n")
+  } // printUndoStack
   
   // MARK: - Touch Execution
   func touchDown(atPoint pos: CGPoint) {
@@ -211,7 +247,12 @@ extension GameScene {
                                                     withAnimSpeed: cardAnimSpeed) {
           currentDeck.add(cards: resetWastePile)
           hideRestartArrow()
+          let playerMove = PlayerMove(playerAction: .ResetWastePile)
+          playerMoves.append(playerMove)
         }
+      } else if firstNode.name == "UndoButton" {
+        print("Undo Button Pressed!")
+        undoPressed = true
       } else {
         print("No card or action button touched")
       }
@@ -226,6 +267,12 @@ extension GameScene {
   
   func touchUp(atPoint pos: CGPoint) {
     print("Touch Up")
+    if undoPressed {
+      undoPressed = false
+      undoMove()
+      resetTouches()
+      return
+    }
     let dt = TimeInterval(Date().timeIntervalSince1970) - touchStarted
     let ds = firstTouchPos.distanceTo(pos)
 
@@ -242,9 +289,19 @@ extension GameScene {
       
       // If moving from Stock, then cards only move to Waste Pile
       if cardsInMotion.fromStack == .Stock {
+        for card in cardsInMotion.cards {
+          card.onStack = .Waste
+          card.stackNumber = nil
+        }
         wastePile.add(cards: cardsInMotion.cards,
                       withWiggle: isTapped,
                       withAnimSpeed: cardAnimSpeed)
+        let playerMove = PlayerMove(playerAction: .TapStock,
+                                    cards: cardsInMotion.cards,
+                                    fromStack: .Stock,
+                                    toStack: .Waste)
+        playerMoves.append(playerMove)
+
         if currentDeck.unusedCards.count == 0 {
           restartStockPile.isHidden = false
           animateRestartArrow()
@@ -287,6 +344,10 @@ extension GameScene {
         // Else move cards back to original location
         else {
           if cardsInMotion.fromStack! == .Waste {
+            for card in cardsInMotion.cards {
+              card.onStack = .Waste
+              card.stackNumber = nil
+            }
             wastePile.add(cards: cardsInMotion.cards,
                           withWiggle: isTapped,
                           withAnimSpeed: cardAnimSpeed)

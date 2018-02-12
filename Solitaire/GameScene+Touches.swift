@@ -1,5 +1,5 @@
 //
-//  GameScen+Touches.swift
+//  GameScene+Touches.swift
 //  Solitaire
 //
 //  Created by Eric Milhizer on 1/27/18.

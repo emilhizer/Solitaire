@@ -101,7 +101,26 @@ class CardDeck {
   } // topCard
 
   
+  func printUnusedCards() {
+    print("\nUnused Cards (on Stock):")
+    printCards(cards: unusedCards)
+  }
+  func printUsedCards() {
+    print("\nUsed Cards (in play):")
+    printCards(cards: usedCards)
+  }
   
+  private func printCards(cards: [Card]) {
+    if cards.count > 0 {
+      for i in 0..<cards.count {
+        let indexS = String(format: "%02d", i)
+        print("\(indexS): \(cards[i].getCardString())")
+      }
+    } else {
+      print("Empty")
+    }
+  }
+
   
   
   

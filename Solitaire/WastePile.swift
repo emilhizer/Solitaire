@@ -74,7 +74,7 @@ class WastePile {
       
       animateCards.append(animateCard)
 
-      card.onStack = .Waste
+//      card.onStack = .Waste
       pile.append(card)
     } // loop through (up to 3) cards
 
@@ -99,7 +99,7 @@ class WastePile {
       }
       self.animateCards[i].card.run(SKAction.sequence([moveToStart, delayAction, moveCombo, runFinish]))
     } // loop through (up to 3) cards
-    print("Added thee cards to Waste Pile")
+    print("Added three cards to Waste Pile")
   } // add:card
   
   private func addToThreeUp(card: Card) {
@@ -138,10 +138,11 @@ class WastePile {
         let delayAction = SKAction.wait(forDuration: finalDelay)
         let moveToFinal = SKAction.move(to: finalPosition, duration: animTime)
         moveToFinal.timingMode = .easeOut
-        let runFinal = SKAction.run {
-          self.threeUpCards[i].position = finalPosition
-        }
-        threeUpCards[i].run(SKAction.sequence([delayAction, moveToFinal, runFinal]))
+//        let runFinal = SKAction.run {
+//          self.threeUpCards[i].position = finalPosition
+//        }
+//        threeUpCards[i].run(SKAction.sequence([delayAction, moveToFinal, runFinal]))
+        threeUpCards[i].run(SKAction.sequence([delayAction, moveToFinal]))
       } // loop through threeUp cards
     } // proper card config to bump the ThreeUp stack
   } // bumpThreeUp
@@ -174,19 +175,86 @@ class WastePile {
           card.position = stockPosition
           card.zPosition = newZPos
           card.onStack = .Stock
+          card.stackNumber = nil
         }
         card.run(SKAction.sequence([delayAction, moveCombo, runFinal]))
         newZPos += 10
         newDelay += animTime
       } // loop through all cards (in reverse order)
+      
       let returnArray = Array(pile.reversed())
       pile.removeAll()
       threeUpCards.removeAll()
       return returnArray
+      
     } else {
       return nil
     }
   } // reset pile
+  
+  func returnToStock(card: Card, stockPosition: CGPoint, stockZPosition: CGFloat, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
+
+    card.zPosition = stockZPosition
+
+    let moveTo = SKAction.move(to: stockPosition, duration: animSpeed)
+    let runWhileMoving = SKAction.run {
+      card.flipOver(withAnimation: true, animSpeed: animSpeed)
+    }
+    let moveCombo = SKAction.group([moveTo, runWhileMoving])
+//    let runFinal = SKAction.run {
+//      card.position = stockPosition
+//    }
+//    card.run(SKAction.sequence([moveCombo, runFinal]))
+    card.run(moveCombo)
+  } // returnToStock
+  
+  func resetThreeUp(withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
+    threeUpCards.removeAll()
+    let delayAction = SKAction.wait(forDuration: delay)
+    if pile.count >= 3 {
+      var index = pile.count - 3
+      threeUpCards.append(pile[index])
+      index += 1
+      threeUpCards.append(pile[index])
+      var moveAction = SKAction.move(to: threeUpPositions[1], duration: animSpeed)
+      pile[index].run(SKAction.sequence([delayAction, moveAction]))
+      index += 1
+      threeUpCards.append(pile[index])
+      moveAction = SKAction.move(to: threeUpPositions[2], duration: animSpeed)
+      pile[index].run(SKAction.sequence([delayAction, moveAction]))
+    } else if pile.count == 2 {
+      var index = pile.count - 2
+      threeUpCards.append(pile[index])
+      index += 1
+      threeUpCards.append(pile[index])
+      let moveAction = SKAction.move(to: threeUpPositions[1], duration: animSpeed)
+      pile[index].run(SKAction.sequence([delayAction, moveAction]))
+    } else if pile.count == 1 {
+      threeUpCards.append(pile[0])
+    }
+    
+  } // resetThreeUp
+  
+  func printCards() {
+    print("\nWaste Pile:")
+    printCards(cards: pile)
+    print("\n -- ThreeUp Cards:")
+    printCards(cards: threeUpCards)
+  }
+  
+  private func printCards(cards: [Card]) {
+    if cards.count > 0 {
+      for i in 0..<cards.count {
+        let indexS = String(format: "%02d", i)
+        print("\(indexS): \(cards[i].getCardString())")
+      }
+    } else {
+      print("Empty")
+    }
+  }
+
+  
+  
   
   
 } // WastePile

@@ -60,20 +60,28 @@ class Tableau {
   // MARK: - Functions
   
   func add(card: Card, withWiggle wiggle: Bool = false, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
+    
     let initialPosition = card.position
     var finalPosition = lastPosition
+    
     if !isEmpty {
       let cardSpacing = (card.facing == .Front) ? upCardSpacing : downCardSpacing
       finalPosition.y -= cardSpacing
     }
+
+    // Initiall move card to it's final position
+    //   because subequent cards depend upon this cards final position
     card.position = finalPosition
+    
     if card.facing == .Front {
       pileUp.append(card)
     } else {
       pileDown.append(card)
     }
     let zPositionFinal = zBasePosition + (10 * CGFloat(totalCards))
-    
+
+    // Need to move card (temporarily) back to initial position
+    //   so we can animate from initial pos to final pos
     let moveToStart = SKAction.move(to: initialPosition, duration: 0)
     let delayAction = SKAction.wait(forDuration: delay)
     let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
@@ -88,7 +96,7 @@ class Tableau {
 
   } // add:card
   
-  func add(cards: [Card], withWiggle wiggle: Bool, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
+  func add(cards: [Card], withWiggle wiggle: Bool = false, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
     guard cards.count > 0 else {
       fatalError("No cards provided to add to pile")
     }
@@ -210,6 +218,38 @@ class Tableau {
       pileUp.append(poppedCard)
     }
   } // flipLowestDownCard
+  
+  func undoFlipCardDown(withAnimation doAnim: Bool = false, animSpeed: TimeInterval = 0) {
+    // If more than one card facing up, then don't flip anything over
+    if pileUp.count != 1 {
+      return
+    }
+    
+    if let poppedCard = pileUp.popLast() {
+      poppedCard.flipOver(withAnimation: doAnim, animSpeed: animSpeed)
+      pileDown.append(poppedCard)
+    }
+  } // undoFlipCardDown
+
+  func printPileUp() {
+    print("\nTableau Up:")
+    printCards(cards: pileUp)
+  }
+  func printPileDown() {
+    print("\nTableau Down:")
+    printCards(cards: pileDown)
+  }
+  
+  private func printCards(cards: [Card]) {
+    if cards.count > 0 {
+      for i in 0..<cards.count {
+        let indexS = String(format: "%02d", i)
+        print("\(indexS): \(cards[i].getCardString())")
+      }
+    } else {
+      print("Empty")
+    }
+  }
   
   
 } // Tableau

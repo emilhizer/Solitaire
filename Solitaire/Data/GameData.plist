@@ -432,15 +432,11 @@
 			<array>
 				<string>52PlayingCardDeck</string>
 			</array>
-			<key>Rules</key>
-			<dict/>
 			<key>Settings</key>
 			<dict>
 				<key>CardSizePhone</key>
 				<integer>1</integer>
 				<key>CardSizePad</key>
-				<integer>1</integer>
-				<key>CardSizeTV</key>
 				<integer>1</integer>
 			</dict>
 		</dict>

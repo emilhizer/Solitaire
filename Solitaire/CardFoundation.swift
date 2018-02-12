@@ -112,7 +112,22 @@ class CardFoundation {
     return false
   } // canMoveHere
 
+  func printCards() {
+    print("\nFoundation:")
+    printCards(cards: pile)
+  }
   
+  private func printCards(cards: [Card]) {
+    if cards.count > 0 {
+      for i in 0..<cards.count {
+        let indexS = String(format: "%02d", i)
+        print("\(indexS): \(cards[i].getCardString())")
+      }
+    } else {
+      print("Empty")
+    }
+  }
+
   
   
   

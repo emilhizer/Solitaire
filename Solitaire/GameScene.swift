@@ -19,6 +19,43 @@ class GameScene: SKScene {
   var cardFoundations = [CardFoundation]()
   var wastePile: WastePile!
   
+  // Player Moves
+  enum PlayerAction: Int {
+    case MoveCard = 0
+    case TapStock
+    case ResetWastePile
+  } // PlayerAction
+  struct PlayerMove {
+    var playerAction: PlayerAction
+    var cards: [Card]?
+    var fromStack: StackType?
+    var fromStackNo: Int?
+    var toStack: StackType?
+    var toStackNo: Int?
+    
+    init (playerAction: PlayerAction) {
+      guard playerAction == .ResetWastePile else {
+        fatalError("Can only init w/out from/to stack using ResetWastePile")
+      }
+      self.playerAction = playerAction
+    }
+    init(playerAction: PlayerAction, cards: [Card], fromStack: StackType, toStack: StackType) {
+      self.playerAction = playerAction
+      self.cards = cards
+      self.fromStack = fromStack
+      self.toStack = toStack
+    }
+    init(playerAction: PlayerAction, cards: [Card], fromStack: StackType, fromStackNo: Int?, toStack: StackType, toStackNo: Int?) {
+      self.playerAction = playerAction
+      self.cards = cards
+      self.fromStack = fromStack
+      self.fromStackNo = fromStackNo
+      self.toStack = toStack
+      self.toStackNo = toStackNo
+    }
+  } // PlayerMove
+  var playerMoves = [PlayerMove]()
+  
   
   // Game Setup
   var feltImage = "Feltr2"
@@ -37,6 +74,7 @@ class GameScene: SKScene {
   var cardAnimSpeed = TimeInterval(0.1)
   var doCardFlipAnim = true
   var restartStockPile = SKSpriteNode()
+  var undoButton = SKShapeNode()
 
   // Game Control
   enum GameState: Int {
@@ -67,6 +105,7 @@ class GameScene: SKScene {
     }
   } // CardsInMotion
   var cardsInMotion = CardsInMotion()
+  var undoPressed = false
 
   
   // MARK: - Init and Setup
@@ -85,6 +124,8 @@ class GameScene: SKScene {
     setupCards()
     
     startNewGame()
+    
+    setupGUI()
     
   } // didMove:to view
   
@@ -181,7 +222,17 @@ class GameScene: SKScene {
     wastePile = WastePile(basePosition: wasteLocation,
                           cardSpacing: wastePileHSpacing)
 
-  } // setupCardLocations
+  } // setupCards
+  
+  func setupGUI() {
+    undoButton = SKShapeNode(rect: CGRect(origin: CGPoint.zero,
+                                          size: CGSize(width: 180, height: 80)))
+    undoButton.fillColor = UIColor.blueberry()
+    undoButton.name = "UndoButton"
+    undoButton.position = CGPoint(x: 0, y: -200)
+    undoButton.zPosition = 1
+    addChild(undoButton)
+  } // setupGUI
   
   func create(emptySlotSprite imageName: String, withSize emptySlotSize: CGSize, andPosition basePosition: CGPoint) -> SKSpriteNode {
     let emptySlot = SKSpriteNode(imageNamed: imageName)

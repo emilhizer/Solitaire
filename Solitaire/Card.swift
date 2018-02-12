@@ -167,6 +167,14 @@ class Card: SKSpriteNode {
     return nil
   }
   
+  func printCard() {
+    let cardPos = "(" + String(format: "%0.0f", position.x) + ", " + String(format: "%0.0f", position.y) + ")"
+    print("\(value) of \(suit) (\(facing)); pos: \(cardPos) - z: \(zPosition)")
+  }
+  func getCardString() -> String {
+    let cardPos = "(" + String(format: "%0.0f", position.x) + ", " + String(format: "%0.0f", position.y) + ")"
+    return "\(value) of \(suit) (\(facing)); pos: \(cardPos) - z: \(zPosition)"
+  }
   
   
   
