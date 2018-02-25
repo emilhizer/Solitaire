@@ -14,6 +14,7 @@ class GameScene: SKScene {
   // Game Data
   var gameInitData = [String: Any]()
   var cardDecks = [String: CardDeck]()
+  var originalDeck: CardDeck!
   var currentDeck: CardDeck!
   var tableaus = [Tableau]()
   var cardFoundations = [CardFoundation]()
@@ -56,8 +57,8 @@ class GameScene: SKScene {
   } // PlayerMove
   var playerMoves = [PlayerMove]()
   
-  
   // Game Setup
+  var replayDeck: CardDeck?
   var feltImage = "Feltr2"
   var cardBackImage = "CardBackNU"
   var cardPadPercent = CGFloat(0.1)
@@ -74,15 +75,32 @@ class GameScene: SKScene {
   var cardAnimSpeed = TimeInterval(0.1)
   var doCardFlipAnim = true
   var restartStockPile = SKSpriteNode()
-  var undoButton = SKShapeNode()
+  var youWinLabel = SKSpriteNode()
+  
+  // Audio Setup
+  let audioHelper = AudioHelper.sharedInstance
+  var dealSounds = [String]()
+  enum AudioName {
+    static var dealBaseName = "carddeal"
+    static var cardShuffle = "cardshuffle"
+    static var background = "background"
+    static var applause = "applause"
+  }
+  var backgroundVolume: Float = 0.4
+  var soundFXVolume: Float = 0.6
+  
+  // Heads Up Display
+  var hud: HUD!
+  var settingsVolumeTouched = false
+  var settingsFXTouched = false
 
   // Game Control
   enum GameState: Int {
     case Starting = 0
     case Dealing
     case Playing
-    case Animating
     case Touching
+    case Animating
     case Ending
   }
   var gameState: GameState = .Starting
@@ -105,27 +123,65 @@ class GameScene: SKScene {
     }
   } // CardsInMotion
   var cardsInMotion = CardsInMotion()
-  var undoPressed = false
 
   
   // MARK: - Init and Setup
   override func didMove(to view: SKView) {
     
+    print("Init: Load game data")
     loadGameInitData()
     
+    print("Init: Setup background")
     setupBackground()
     
+    print("Init: Setup music")
+    setupAudio()
+    
+    print("Init: Setup HUD")
+    setupHUD()
+
+    print("Init: Setup dealer")
     setupDealer()
     
     parseCardsData(fromPList: gameInitData)
-    
-    currentDeck = cardDecks["52PlayingCardDeck"]
+    if replayDeck == nil {
+      print("Init: Replay deck is nil")
+      currentDeck = cardDecks["52PlayingCardDeck"]
+      currentDeck.shuffleDeck()
+    } else {
+      print("Init: Using previous replay deck")
+      currentDeck = replayDeck!
+    }
+    originalDeck = currentDeck.copy()
 
+    print("Init: Setup Cards")
     setupCards()
     
-    startNewGame()
+    /// -------------------
+    /*
+    let jumpHeight = CGFloat(100)
+    if let card = currentDeck.getCard() {
+      card.position = CGPoint(x: 0, y: jumpHeight)
+      addChild(card)
+    }
     
-    setupGUI()
+    if let card = currentDeck.getCard() {
+      card.position = CGPoint.zero
+      addChild(card)
+      let printAction = SKAction.run {
+        print("Card pos: \(card.position)")
+      }
+      let jump = SKAction.jump(toHeight: jumpHeight,
+                               fromPosition: card.position,
+                               toPosition: CGPoint(x: card.position.x+0, y: card.position.y),
+                               duration: 3)
+      card.run(SKAction.sequence([printAction, jump, printAction]))
+    }
+    */
+    /// -------------------
+    
+    print("Init: Start new game")
+    startNewGame()
     
   } // didMove:to view
   
@@ -146,10 +202,55 @@ class GameScene: SKScene {
     background.zPosition = -100
     background.name = "Background"
     addChild(background)
+    
+    youWinLabel = SKSpriteNode(imageNamed: "YouWinLabel")
+    youWinLabel.position = CGPoint.zero
+    youWinLabel.zPosition = 2000
+    let widthSizeRatio = (size.width / 1.5) / youWinLabel.size.width
+    youWinLabel.size = CGSize(width: size.width / 1.5,
+                              height: youWinLabel.size.height * widthSizeRatio)
+    youWinLabel.isHidden = true
+    addChild(youWinLabel)
   } // setupBackground()
   
+  func setupAudio() {
+    audioHelper.setupGameSound(name: AudioName.background,
+                               fileNamed: "BigChill.m4a",
+                               withVolume: 0,
+                               isBackground: true)
+    
+    audioHelper.playSound(name: AudioName.background,
+                          fadeDuration: 0)
+    runAfter(delay: 0.1) {
+      self.audioHelper.playSound(name: AudioName.background,
+                                 withVolume: self.backgroundVolume,
+                                 fadeDuration: 1)
+    }
+    audioHelper.setupGameSound(name: AudioName.cardShuffle,
+                               fileNamed: "cardshuffle.m4a",
+                               withVolume: soundFXVolume)
+    audioHelper.setupGameSound(name: AudioName.applause,
+                               fileNamed: "SmallCrowdApplause.m4a",
+                               withVolume: soundFXVolume)
+    for i in 0...9 {
+      let dealName = AudioName.dealBaseName + "\(i)"
+      audioHelper.setupGameSound(name: dealName,
+                                 fileNamed: "\(dealName).m4a",
+                                 withVolume: soundFXVolume)
+      dealSounds.append(dealName)
+    }
+  } // setupBackgroundMusic
+  
+  func setupHUD() {
+    hud = HUD(size: size, hide: false)
+    addChild(hud)
+    hud.volumeChangedDelegate = self
+    hud.setVolume(to: backgroundVolume)
+    hud.setFXVolume(to: soundFXVolume)
+  } // setupHUD
+  
   func setupDealer() {
-    dealerPosition.y = -(size.height / 2) * 1.1
+    dealerPosition.y = -(size.height / 2) * 1.3
   } // setupDealer
   
   func setupCards() {
@@ -171,32 +272,48 @@ class GameScene: SKScene {
     cardHSpacing = (size.width * cardPadPercent) / (CGFloat(cardsAcross) + 1)
     cardVSpacing = cardSize.height * 0.2
     
-    var tableauX = -(size.width / 2) + cardHSpacing + (cardSize.width / 2)
-    let tableauY = size.height * (1/4)
-    for _ in 0..<cardsAcross {
-      let basePosition = CGPoint(x: tableauX, y: tableauY)
-      let newTableau = Tableau(basePosition: basePosition,
-                               cardSpacing: cardVSpacing)
-      let emptySlot = create(emptySlotSprite: "EmptySlot",
-                                     withSize: cardSize,
-                                     andPosition: basePosition)
-      addChild(emptySlot)
-      tableaus.append(newTableau)
-      tableauX += cardSize.width + cardHSpacing
-    }
-
-    var foundationX = tableaus[0].basePosition.x
-    let foundationY = (size.height / 2) - cardSize.height
+    print("Size: (\(size.width), \(size.height))")
+    print("Scene: (\(scene!.size.width), \(scene!.size.height))")
+    print("Frame: (\(frame.width), \(frame.height))")
+    var foundationX = -(size.width / 2) + cardHSpacing + (cardSize.width / 2)
+    let foundationY = (size.height / 2) - (1.5 * cardSize.height)
+    print("FoundatationXY: (\(foundationX), \(foundationY)")
     for _ in 0...3 {
       let basePosition = CGPoint(x: foundationX, y: foundationY)
       let emptySlot = create(emptySlotSprite: "EmptySlot",
                              withSize: cardSize,
                              andPosition: basePosition)
       addChild(emptySlot)
-      cardFoundations.append(CardFoundation(basePosition: basePosition))
+      let cardFoundation = CardFoundation(basePosition: basePosition)
+      let randSound = dealSounds[Int.random(dealSounds.count)]
+      let soundFX = SKAction.run {
+        self.audioHelper.playSound(name: randSound)
+      }
+      cardFoundation.soundFX = soundFX
+      cardFoundations.append(cardFoundation)
       foundationX += cardSize.width + cardHSpacing
     }
 
+    var tableauX = cardFoundations[0].basePosition.x
+    let tableauY = foundationY - (1.5 * cardSize.height)
+    for _ in 0..<cardsAcross {
+      let basePosition = CGPoint(x: tableauX, y: tableauY)
+      let newTableau = Tableau(basePosition: basePosition,
+                               cardSpacing: cardVSpacing,
+                               downSpacing: cardVSpacing / 2)
+      let randSound = dealSounds[Int.random(dealSounds.count)]
+      let soundFX = SKAction.run {
+        self.audioHelper.playSound(name: randSound)
+      }
+      newTableau.soundFX = soundFX
+      let emptySlot = create(emptySlotSprite: "EmptySlot",
+                             withSize: cardSize,
+                             andPosition: basePosition)
+      addChild(emptySlot)
+      tableaus.append(newTableau)
+      tableauX += cardSize.width + cardHSpacing
+    }
+    
     stockLocation.x = -tableaus[0].basePosition.x
     stockLocation.y = cardFoundations[0].basePosition.y
     stockCardBase = create(emptySlotSprite: "EmptySlot",
@@ -221,18 +338,13 @@ class GameScene: SKScene {
     let wastePileHSpacing = (cardSize.width - cardHSpacing) / 2
     wastePile = WastePile(basePosition: wasteLocation,
                           cardSpacing: wastePileHSpacing)
+    let randSound = dealSounds[Int.random(dealSounds.count)]
+    let soundFX = SKAction.run {
+      self.audioHelper.playSound(name: randSound)
+    }
+    wastePile.soundFX = soundFX
 
   } // setupCards
-  
-  func setupGUI() {
-    undoButton = SKShapeNode(rect: CGRect(origin: CGPoint.zero,
-                                          size: CGSize(width: 180, height: 80)))
-    undoButton.fillColor = UIColor.blueberry()
-    undoButton.name = "UndoButton"
-    undoButton.position = CGPoint(x: 0, y: -200)
-    undoButton.zPosition = 1
-    addChild(undoButton)
-  } // setupGUI
   
   func create(emptySlotSprite imageName: String, withSize emptySlotSize: CGSize, andPosition basePosition: CGPoint) -> SKSpriteNode {
     let emptySlot = SKSpriteNode(imageNamed: imageName)
@@ -244,15 +356,34 @@ class GameScene: SKScene {
   } // get:emptySlotSprite
   
   func startNewGame() {
-    
-    currentDeck.shuffleDeck()
-    
     gameState = .Dealing
-    deal()
-    
+    runAfter(delay: 1) {
+      self.deal()
+    }
   } // startNewGame
   
+  func restartGame(reshuffle: Bool) {
+    let gameScene = GameScene(size: size)
+    if !reshuffle {
+      gameScene.replayDeck = originalDeck
+    }
+    gameScene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+    gameScene.scaleMode = .aspectFill
+    let transition = SKTransition.fade(withDuration: 1.5)
+    view!.presentScene(gameScene, transition: transition)
+  } // restartGame
+  
   func deal() {
+    var delay = TimeInterval(0)
+    
+//    for _ in 0...0 {
+//      runAfter(delay: delay) {
+//        self.audioHelper.playSound(name: AudioName.cardShuffle,
+//                              withVolume: self.soundFXVolume)
+//      }
+//      delay += audioHelper.duration(ofSound: AudioName.cardShuffle) +
+//               TimeInterval(0.5)
+//    }
     
     var cardCount = 0
     for tableauRow in 0..<cardsAcross {
@@ -269,10 +400,11 @@ class GameScene: SKScene {
           card.position = dealerPosition
           card.zPosition = 1000
 
-          let delay = cardAnimSpeed * TimeInterval(cardCount)
+          delay += cardAnimSpeed // * TimeInterval(cardCount)
           tableaus[tableauCol].add(card: card,
                                    withAnimSpeed: cardAnimSpeed,
                                    delay: delay)
+
         } // draw card
         cardCount += 1
       } // for tableauCol
@@ -291,18 +423,23 @@ class GameScene: SKScene {
       currentZPos += 10
     }
 
+    delay += cardAnimSpeed * 2
     if let card = currentDeck.topCard() {
+      let randSound = dealSounds[Int.random(dealSounds.count)]
       card.isHidden = false
       card.position = dealerPosition
-      let wait = SKAction.wait(forDuration: cardAnimSpeed * TimeInterval(30))
+      let wait = SKAction.wait(forDuration: delay)
       let moveAction = SKAction.move(to: stockLocation, duration: cardAnimSpeed * 4)
+      let playSound = SKAction.run {
+        self.audioHelper.playSound(name: randSound)
+      }
       let runAction = SKAction.run {
         for eachCard in self.currentDeck.unusedCards {
           eachCard.isHidden = false
         }
         self.gameState = .Playing
       }
-      let sequence = SKAction.sequence([wait, moveAction, runAction])
+      let sequence = SKAction.sequence([wait, moveAction, playSound, runAction])
       card.run(sequence)
     }
     

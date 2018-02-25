@@ -50,6 +50,10 @@ class Card: SKSpriteNode {
   var onStack: StackType?
   var stackNumber: Int?
   var isTopOfWaste = false
+  
+  private var frontImageName: String
+  private var backImageName: String
+  private var frontBackgroundName: String
 
   private var frontBackground: SKTexture
   private var frontTexture: SKTexture
@@ -65,6 +69,10 @@ class Card: SKSpriteNode {
   
   init(suit: Suit, value: Int, frontImage: String, backImage: String, frontBackground: String = "CardFrontTexture") {
 
+    self.frontImageName = frontImage
+    self.backImageName = backImage
+    self.frontBackgroundName = frontBackground
+    
     self.frontBackground = SKTexture(imageNamed: frontBackground)
     self.suit = suit
     self.value = value
@@ -75,12 +83,12 @@ class Card: SKSpriteNode {
                color: .clear,
                size: self.frontBackground.size())
     
-    name = "\(value) of \(suit)"
+    name = "Card"
     
     frontFaceNode = SKSpriteNode(texture: frontTexture)
     frontFaceNode.size = CGSize(width: size.width * frontFaceScale,
                                 height: size.height * frontFaceScale)
-    frontFaceNode.name = "FrontFace"
+    frontFaceNode.name = "Card"
     frontFaceNode.zPosition = 1
     addChild(frontFaceNode)
     
@@ -137,7 +145,15 @@ class Card: SKSpriteNode {
       texture! = frontBackground
     }
   } // faceUp
-
+  
+  override func copy() -> Any {
+    return Card(suit: self.suit,
+                value: self.value,
+                frontImage: self.frontImageName,
+                backImage: self.backImageName,
+                frontBackground: self.frontBackgroundName)
+  }
+  
 //  func animate(toPos pos: CGPoint, duration: TimeInterval) {
 //    let moveAnim = SKAction.move(to: pos, duration: duration)
 //    run(moveAnim)

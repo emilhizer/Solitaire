@@ -53,6 +53,7 @@ extension GameScene {
   } // movePile
   
   private func startMovingCards(startingWithCard card: Card) {
+    print("StartMovingCards")
     if let stackType = card.onStack {
       cardsInMotion.fromStack = stackType
       cardsInMotion.fromStackNo = card.stackNumber
@@ -206,7 +207,7 @@ extension GameScene {
     touchStarted = 0
     firstTouchPos = CGPoint.zero
     cardTouched = nil
-    printUndoStack()
+//    printUndoStack()
   } // resetTouches
 
   func printUndoStack() {
@@ -229,10 +230,77 @@ extension GameScene {
     print(" --------\n")
   } // printUndoStack
   
+  func evaluateGameWon() {
+    var foundationCardCount = 0
+    for cardFoundation in cardFoundations {
+      foundationCardCount += cardFoundation.pile.count
+    } // loop through all foundations looking for full pile
+    if foundationCardCount >= currentDeck.totalCardsInDeck {
+      gameState = .Ending
+      print("Winner, winner, chicken dinner!!!")
+      animateWinning()
+    }
+  } // evaluateGameWon
+  
+  func animateWinning() {
+    
+    // Animate cards on foundations
+    var delay = TimeInterval(0.5)
+    for cardFoundation in cardFoundations {
+      for card in cardFoundation.pile {
+        let delayAnim = SKAction.wait(forDuration: delay)
+        let jumpTo = SKAction.jump(toHeight: card.size.height * 1.5,
+                                   fromPosition: card.position,
+                                   toPosition: dealerPosition,
+                                   duration: 2)
+        let flipCard = SKAction.run {
+          card.flipOver(withAnimation: true,
+                        animSpeed: self.cardAnimSpeed)
+        }
+        let groupAction = SKAction.group([jumpTo, flipCard])
+        card.run(SKAction.sequence([delayAnim, groupAction]))
+        delay += cardAnimSpeed
+      } // loop through all cards in foundation
+    } // loop through all foundations
+    delay += 2
+    runAfter(delay: delay) {
+      self.restartGame(reshuffle: true)
+    }
+    
+    // Animate you win! label
+    youWinLabel.isHidden = false
+    youWinLabel.xScale = 0
+    youWinLabel.yScale = 0
+    let labelDelay = SKAction.wait(forDuration: 0.5)
+    let labelSpeed = TimeInterval(0.5)
+    let scale1 = SKAction.scale(to: 1.5, duration: labelSpeed)
+    scale1.timingMode = .easeIn
+    let scale2 = SKAction.scale(to: 0.8, duration: labelSpeed)
+    scale2.timingMode = .easeOut
+    let scale3 = SKAction.scale(to: 1.1, duration: labelSpeed)
+    scale3.timingMode = .easeIn
+    let scale4 = SKAction.scale(to: 1.0, duration: labelSpeed)
+    scale4.timingMode = .easeOut
+    let scaleSeq = SKAction.sequence([labelDelay, scale1, scale2, scale3, scale4])
+    youWinLabel.run(scaleSeq)
+    
+    // Play applause
+    audioHelper.fadeOutSound(name: AudioName.background,
+                             fadeDuration: 1,
+                             andStop: true)
+    runAfter(delay: 0.5) {
+      self.audioHelper.playSound(name: AudioName.applause)
+    }
+    
+  } // animateWinning
+  
   // MARK: - Touch Execution
   func touchDown(atPoint pos: CGPoint) {
     print("Touch Down")
-    if let firstNode = nodes(at: pos).first {
+    settingsVolumeTouched = false
+    settingsFXTouched = false
+    
+    if let firstNode = nodes(at: pos).first, firstNode.name == "Card" {
       if let card = Card.getCard(fromNode: firstNode) {
         let stackName = (card.onStack != nil) ? "\(card.onStack!)" : "No Stack"
         print("Touched card: \(card.getCardString()), from \(stackName)")
@@ -242,37 +310,58 @@ extension GameScene {
           firstTouchPos = pos
           lastTouchPos = pos
         }
-      } else if firstNode.name == "StockCardBase" {
-        if let resetWastePile = wastePile.resetPile(toPosition: stockLocation,
-                                                    withAnimSpeed: cardAnimSpeed) {
-          currentDeck.add(cards: resetWastePile)
-          hideRestartArrow()
-          let playerMove = PlayerMove(playerAction: .ResetWastePile)
-          playerMoves.append(playerMove)
-        }
-      } else if firstNode.name == "UndoButton" {
-        print("Undo Button Pressed!")
-        undoPressed = true
-      } else {
-        print("No card or action button touched")
+      } // card touched
+    } else if let firstNode = nodes(at: pos).first, firstNode.name == "StockCardBase" {
+      if let resetWastePile = wastePile.resetPile(toPosition: stockLocation,
+                                                  withAnimSpeed: cardAnimSpeed) {
+        currentDeck.add(cards: resetWastePile)
+        hideRestartArrow()
+        let playerMove = PlayerMove(playerAction: .ResetWastePile)
+        playerMoves.append(playerMove)
       }
+    } else if hud.volumeTouched(at: pos) {
+      settingsVolumeTouched = true
+      hud.changeVolume(to: pos)
+    } else if hud.fxTouched(at: pos) {
+      settingsFXTouched = true
+      hud.changeFX(to: pos)
+    } else {
+      print("No card or action button touched")
+      let nodeTouched = nodes(at: pos).first?.name ?? "No node touched"
+      print("Node: \(nodeTouched)")
     }
   } // touchDown
   
   func touchMoved(toPoint pos: CGPoint) {
     if let card = cardTouched {
       movePile(withStartingCard: card, toPoint: pos)
+    } else if settingsVolumeTouched {
+      hud.changeVolume(to: pos)
+    } else if settingsFXTouched {
+      hud.changeFX(to: pos)
     }
   } // touchMoved
   
   func touchUp(atPoint pos: CGPoint) {
     print("Touch Up")
-    if undoPressed {
-      undoPressed = false
+    if let firstNode = nodes(at: pos).first, firstNode.name == "UndoButton" {
+      print("Undo Button Pressed!")
       undoMove()
       resetTouches()
       return
+    } else if let firstNode = nodes(at: pos).first, firstNode.name == "ReplayGameButton" {
+      restartGame(reshuffle: false)
+    } else if let firstNode = nodes(at: pos).first, firstNode.name == "NewGameButton" {
+      restartGame(reshuffle: true)
+    } else if let firstNode = nodes(at: pos).first, firstNode.name == "SettingsButton" {
+      hud.showSettings()
+      resetTouches()
+      return
+    } else if hud.buttonPressed(at: pos) {
+      resetTouches()
+      return
     }
+
     let dt = TimeInterval(Date().timeIntervalSince1970) - touchStarted
     let ds = firstTouchPos.distanceTo(pos)
 
@@ -281,9 +370,11 @@ extension GameScene {
       print(" -- Tapped !!!")
       isTapped = true
       if let card = cardTouched {
-        startMovingCards(startingWithCard: card)
-      } // a valid card was touched
-    } // tapped
+        if cardsInMotion.cards.count == 0 {
+          startMovingCards(startingWithCard: card)
+        }
+      } // valid card tapped
+    } // playing board tapped
     
     if (cardsInMotion.cards.count > 0) {
       
@@ -294,7 +385,7 @@ extension GameScene {
           card.stackNumber = nil
         }
         wastePile.add(cards: cardsInMotion.cards,
-                      withWiggle: isTapped,
+                      withWiggle: false,
                       withAnimSpeed: cardAnimSpeed)
         let playerMove = PlayerMove(playerAction: .TapStock,
                                     cards: cardsInMotion.cards,
@@ -359,6 +450,8 @@ extension GameScene {
         }
       } // Cards in motion not from stock pile
     } // cards are in motion
+    
+    evaluateGameWon()
     
     resetTouches()
   } // touchUp

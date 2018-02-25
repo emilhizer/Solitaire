@@ -47,7 +47,7 @@ public extension SKNode {
    * Makes this node the frontmost node in its parent.
    */
   public func bringToFront() {
-    if let parent = self.parent{
+    if let parent = self.parent {
       removeFromParent()
       parent.addChild(self)
     }

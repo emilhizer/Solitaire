@@ -47,11 +47,26 @@ public extension SKAction {
   /**
    * Creates an action to perform a parabolic jump.
    */
-  public class func jumpToHeight(_ height: CGFloat, duration: TimeInterval, originalPosition: CGPoint) -> SKAction {
-    return SKAction.customAction(withDuration: duration) {(node, elapsedTime) in
+  public class func jump(toHeight height: CGFloat, fromPosition originalPosition: CGPoint, toPosition finalPosition: CGPoint? = nil, duration: TimeInterval) -> SKAction {
+    return SKAction.customAction(withDuration: duration) { (node, elapsedTime) in
+      let endPostion = finalPosition ?? originalPosition
+      let distanceX = endPostion.x - originalPosition.x
+      let distanceY = endPostion.y - originalPosition.y
+      
+      let gravityConstant = CGFloat(4)
+      
+      let endHeight = height - (distanceY / 2)
+      let endRatio = (distanceY / endHeight / gravityConstant) + 1
+      
       let fraction = elapsedTime / CGFloat(duration)
-      let yOffset = height * 4 * fraction * (1 - fraction)
-      node.position = CGPoint(x: originalPosition.x, y: originalPosition.y + yOffset)
+//      let yOffset = height * 4 * fraction * (1 - fraction)
+      let yOffset = endHeight * 4 * fraction * (endRatio - fraction)
+      let xOffset = distanceX * fraction
+      node.position = CGPoint(x: originalPosition.x + xOffset,
+                              y: originalPosition.y + yOffset)
     }
   }
+  
+  
+  
 }

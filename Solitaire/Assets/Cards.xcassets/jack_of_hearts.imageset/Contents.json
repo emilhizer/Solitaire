@@ -2,11 +2,12 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "jack_of_hearts.png",
+      "filename" : "jack_of_hearts@1x.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
+      "filename" : "jack_of_hearts@2x.png",
       "scale" : "2x"
     },
     {

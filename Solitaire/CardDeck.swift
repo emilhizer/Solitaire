@@ -32,6 +32,9 @@ class CardDeck {
       return nil
     }
   }
+  var totalCardsInDeck: Int {
+    return unusedCards.count + usedCards.count
+  }
   
   // MARK: - Init
   required init(coder aDecoder: NSCoder) {
@@ -100,6 +103,16 @@ class CardDeck {
     }
   } // topCard
 
+  func copy() -> CardDeck {
+    var copyDeck = [Card]()
+    
+    for card in unusedCards {
+      let copyCard = card.copy() as! Card
+      copyDeck.append(copyCard)
+    }
+    return CardDeck(deckName: self.deckName,
+                    initialCards: copyDeck)
+  } // copy
   
   func printUnusedCards() {
     print("\nUnused Cards (on Stock):")

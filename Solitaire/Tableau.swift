@@ -40,6 +40,8 @@ class Tableau {
   var downCardSpacing: CGFloat
   var zBasePosition = CGFloat(100)
   
+  // Sound effect
+  var soundFX: SKAction?
   
   // MARK: - Init
   required init(coder aDecoder: NSCoder) {
@@ -65,7 +67,12 @@ class Tableau {
     var finalPosition = lastPosition
     
     if !isEmpty {
-      let cardSpacing = (card.facing == .Front) ? upCardSpacing : downCardSpacing
+      var cardSpacing: CGFloat
+      if (card.facing == .Front) && (pileUp.count > 0) {
+        cardSpacing = upCardSpacing
+      } else {
+        cardSpacing = downCardSpacing
+      }
       finalPosition.y -= cardSpacing
     }
 
@@ -86,13 +93,19 @@ class Tableau {
     let delayAction = SKAction.wait(forDuration: delay)
     let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
     moveToFinal.timingMode = .easeOut
+    var groupMove: SKAction
+    if let soundFX = soundFX, !wiggle {
+      groupMove = SKAction.group([moveToFinal, soundFX])
+    } else {
+      groupMove = moveToFinal
+    }
     let runAfter = SKAction.run {
       card.zPosition = zPositionFinal
       if wiggle && (card.facing == .Front) {
         self.wiggleCard(card: card, withAnimSpeed: animSpeed)
       }
     }
-    card.run(SKAction.sequence([moveToStart, delayAction, moveToFinal, runAfter]))
+    card.run(SKAction.sequence([moveToStart, delayAction, groupMove, runAfter]))
 
   } // add:card
   
@@ -140,8 +153,8 @@ class Tableau {
         var returnArray = [Card]()
         for _ in cardIndex..<pileUp.count {
           returnArray.insert(pileUp.popLast()!, at: 0)
-          returnArray[0].onStack = nil
-          returnArray[0].stackNumber = nil
+//          returnArray[0].onStack = nil
+//          returnArray[0].stackNumber = nil
         }
         return returnArray
       } else {
@@ -154,8 +167,8 @@ class Tableau {
         var returnArray = [Card]()
         for _ in cardIndex..<pileDown.count {
           returnArray.insert(pileDown.popLast()!, at: 0)
-          returnArray[0].onStack = nil
-          returnArray[0].stackNumber = nil
+//          returnArray[0].onStack = nil
+//          returnArray[0].stackNumber = nil
         }
         return returnArray
       } else {

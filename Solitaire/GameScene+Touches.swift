@@ -14,13 +14,26 @@ extension GameScene {
   
   // MARK: - Touches
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if gameState == .Playing {
-      priorGameState = .Playing
-      gameState = .Touching
-      if let touch = touches.first {
-        touchDown(atPoint: touch.location(in: self))
+    // Determine if any nodes have actions in process
+    var actionsInProcess = false
+    enumerateChildNodes(withName: "//*") {
+      (node, stop) in
+      if node.name == "Card" && node.hasActions() {
+        actionsInProcess = true
+        print("Hey! Cards in motion!")
+        stop.initialize(to: true)
       }
     }
+    
+    if !actionsInProcess {
+      if gameState == .Playing {
+        priorGameState = .Playing
+        gameState = .Touching
+        if let touch = touches.first {
+          touchDown(atPoint: touch.location(in: self))
+        }
+      }
+    } // no actions currently in process
   } // touchesBegan
   
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {

@@ -32,6 +32,9 @@ class WastePile {
     return pile.count
   }
   
+  // Sound effect
+  var soundFX: SKAction?
+  
   // MARK: - Init
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
@@ -45,6 +48,9 @@ class WastePile {
     threeUpPositions.append(nextPostion)
     nextPostion += CGPoint(x: spacing, y: 0)
     threeUpPositions.append(nextPostion)
+    print(" -- Waste Base Position: \(basePosition)")
+    print(" -- -- Three Up Positions: \(threeUpPositions)")
+    print(" -- Card Spacing: \(spacing)")
   } // init
   
   
@@ -70,8 +76,11 @@ class WastePile {
       
       let animateCard = AnimateCard(card: card,
                                     origPos: card.position)
+      card.printCard()
       
       addToThreeUp(card: card)
+      
+      card.printCard()
       
       animateCards.append(animateCard)
 
@@ -83,24 +92,33 @@ class WastePile {
       // Animate (need to add card flipping over animation !!!)
       let finalDelay = delay + (animSpeed * TimeInterval(i))
       let finalPosition = animateCards[i].card.position
+      print("i: \(i) -- Final Position: \(finalPosition)")
       let moveToStart = SKAction.move(to: animateCards[i].origPos, duration: 0)
       let delayAction = SKAction.wait(forDuration: finalDelay)
       let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
       moveToFinal.timingMode = .easeOut
+      var groupMove: SKAction
+      if let soundFX = soundFX, !wiggle {
+        groupMove = SKAction.group([moveToFinal, soundFX])
+      } else {
+        groupMove = moveToFinal
+      }
       let runWhileMoving = SKAction.run {
         if self.animateCards[i].card.facing == .Back {
           self.animateCards[i].card.flipOver(withAnimation: true, animSpeed: animSpeed)
         }
       }
-      let moveCombo = SKAction.group([moveToFinal, runWhileMoving])
+      let moveCombo = SKAction.group([groupMove, runWhileMoving])
       let runFinish = SKAction.run {
         if wiggle {
+          print("Wiggle top card")
           self.wiggleTopCard(withAnimSpeed: animSpeed)
         }
       }
-      self.animateCards[i].card.run(SKAction.sequence([moveToStart, delayAction, moveCombo, runFinish]))
+      animateCards[i].card.run(SKAction.sequence([moveToStart, delayAction, moveCombo, runFinish]))
     } // loop through (up to 3) cards
     print("Added three cards to Waste Pile")
+    printCards(cards: threeUpCards)
   } // add:card
   
   private func addToThreeUp(card: Card) {
@@ -146,8 +164,8 @@ class WastePile {
   
   func getCard() -> Card? {
     if let poppedCard = pile.popLast() {
-      poppedCard.onStack = nil
-      poppedCard.stackNumber = nil
+//      poppedCard.onStack = nil
+//      poppedCard.stackNumber = nil
       if threeUpCards.count > 0 {
         let _ = threeUpCards.popLast()
       }
@@ -178,6 +196,10 @@ class WastePile {
         newZPos += 10
         newDelay += animTime
       } // loop through all cards (in reverse order)
+      
+      if let soundFX = soundFX {
+        pile[0].run(soundFX)
+      }
       
       let returnArray = Array(pile.reversed())
       pile.removeAll()

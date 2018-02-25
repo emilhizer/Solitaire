@@ -17,6 +17,7 @@ class CardFoundation {
   var basePosition = CGPoint.zero
   var pile = [Card]()
   
+  var soundFX: SKAction?
   
   // MARK: - Init
   required init(coder aDecoder: NSCoder) {
@@ -31,32 +32,40 @@ class CardFoundation {
   // MARK: - Functions
   
   func add(card: Card, withWiggle wiggle: Bool = false, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) {
-//    let initialPosition = card.position
-//    let finalPosition = basePosition
-//
-//    card.position = finalPosition
+    // Need to pre / post-move card because the data-location
+    //  of the card's final location needs to be available immediately
+    //  to the game play engine (i.e., to evaluate where to "jump" cards
+    //  "from position" if game is won
+    
+    let initialPosition = card.position
+    let finalPosition = basePosition
+
+    card.position = finalPosition
 
     var finalZPosition = CGFloat(0)
     if let currentZTop = pile.last?.zPosition {
       finalZPosition = currentZTop + CGFloat(10)
     }
     
-//    pile.append(card)
+    pile.append(card)
     
-//    let moveToStart = SKAction.move(to: initialPosition, duration: 0)
+    let moveToStart = SKAction.move(to: initialPosition, duration: 0)
     let delayAction = SKAction.wait(forDuration: delay)
-//    let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
-    let moveToFinal = SKAction.move(to: basePosition, duration: animSpeed)
+    let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
     moveToFinal.timingMode = .easeOut
+    var groupMove: SKAction
+    if let soundFX = soundFX, !wiggle {
+      groupMove = SKAction.group([moveToFinal, soundFX])
+    } else {
+      groupMove = moveToFinal
+    }
     let runAfter = SKAction.run {
       card.zPosition = finalZPosition
-      self.pile.append(card)
       if wiggle {
         self.wiggleTopCard(withAnimSpeed: animSpeed)
       }
     }
-//    card.run(SKAction.sequence([moveToStart, delayAction, moveToFinal, runAfter]))
-    card.run(SKAction.sequence([delayAction, moveToFinal, runAfter]))
+    card.run(SKAction.sequence([moveToStart, delayAction, groupMove, runAfter]))
   } // add:card
   
   private func wiggleTopCard(withAnimSpeed animSpeed: TimeInterval = 0) {
@@ -74,8 +83,8 @@ class CardFoundation {
 
   func getCard() -> Card? {
     if let poppedCard = pile.popLast() {
-      poppedCard.onStack = nil
-      poppedCard.stackNumber = nil
+//      poppedCard.onStack = nil
+//      poppedCard.stackNumber = nil
       return poppedCard
     }
     return nil
