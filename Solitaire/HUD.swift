@@ -11,9 +11,11 @@ import SpriteKit
 
 
 // MARK: - Protocols
-protocol VolumeChangedDelegate: class {
+protocol SettingsChangedDelegate: class {
   func volumeChanged(to level: Float)
   func fxVolumeChanged(to level: Float)
+  func bigCardsChanged(to bigCards: Bool)
+  func settingsExited()
 }
 
 
@@ -21,7 +23,7 @@ protocol VolumeChangedDelegate: class {
 class HUD: SKNode {
   
   // MARK: - Protocol Delegates
-  weak var volumeChangedDelegate: VolumeChangedDelegate?
+  weak var settingsChangedDelegate: SettingsChangedDelegate?
 
   // MARK: - Properties
   var hudSize: CGSize!
@@ -205,6 +207,7 @@ class HUD: SKNode {
   func buttonPressed(at pos: CGPoint) -> Bool {
     if let firstNode = nodes(at: pos).first, firstNode.name == "SettingsExit" {
       hideSettings()
+      settingsChangedDelegate?.settingsExited()
       return true
     } else if let firstNode = nodes(at: pos).first, firstNode.name == "BigCardsSwitch" {
       toggleBigCards()
@@ -245,7 +248,7 @@ class HUD: SKNode {
     var scaleX = (touchPointX - volumeOrigX) / volumeWidth
     scaleX = round(scaleX * 16) / 16
     bgVolumeSliderMask.xScale = scaleX
-    volumeChangedDelegate?.volumeChanged(to: Float(scaleX))
+    settingsChangedDelegate?.volumeChanged(to: Float(scaleX))
   } // changeVolume
   
   func changeFX(to pos: CGPoint) {
@@ -260,7 +263,7 @@ class HUD: SKNode {
     var scaleX = (touchPointX - volumeOrigX) / volumeWidth
     scaleX = round(scaleX * 16) / 16
     fxVolumeSliderMask.xScale = scaleX
-    volumeChangedDelegate?.fxVolumeChanged(to: Float(scaleX))
+    settingsChangedDelegate?.fxVolumeChanged(to: Float(scaleX))
   } // changeFX
 
   func setFXVolume(to level: Float) {
@@ -284,6 +287,7 @@ class HUD: SKNode {
       bigCardsButton.texture = SKTexture(imageNamed: "SwitchOn")
     }
     bigCards = !bigCards
+    settingsChangedDelegate?.bigCardsChanged(to: bigCards)
   } // toggleBigCards
 
 } // HUD

@@ -152,24 +152,34 @@ extension GameScene {
       tableaus[stackNo].add(cards: cardsInMotion.cards,
                             withWiggle: wiggle,
                             withAnimSpeed: cardAnimSpeed)
-      let playerMove = PlayerMove(playerAction: .MoveCard,
-                                  cards: cardsInMotion.cards,
-                                  fromStack: cardsInMotion.fromStack!,
-                                  fromStackNo: cardsInMotion.fromStackNo,
-                                  toStack: .Tableau,
-                                  toStackNo: stackNo)
-      playerMoves.append(playerMove)
+      if !wiggle && !(
+          (cardsInMotion.fromStack! == .Tableau) &&
+          (cardsInMotion.fromStackNo == stackNo)
+        ) {
+        let playerMove = PlayerMove(playerAction: .MoveCard,
+                                    cards: cardsInMotion.cards,
+                                    fromStack: cardsInMotion.fromStack!,
+                                    fromStackNo: cardsInMotion.fromStackNo,
+                                    toStack: .Tableau,
+                                    toStackNo: stackNo)
+        playerMoves.append(playerMove)
+      }
     } else if (stackType == .Foundation) && (cardsInMotion.cards.count == 1) {
       cardFoundations[stackNo].add(card: cardsInMotion.cards[0],
                                    withWiggle: wiggle,
                                    withAnimSpeed: cardAnimSpeed)
-      let playerMove = PlayerMove(playerAction: .MoveCard,
-                                  cards: cardsInMotion.cards,
-                                  fromStack: cardsInMotion.fromStack!,
-                                  fromStackNo: cardsInMotion.fromStackNo,
-                                  toStack: .Foundation,
-                                  toStackNo: stackNo)
-      playerMoves.append(playerMove)
+      if !wiggle && !(
+          (cardsInMotion.fromStack! == .Foundation) &&
+          (cardsInMotion.fromStackNo == stackNo)
+        ) {
+        let playerMove = PlayerMove(playerAction: .MoveCard,
+                                    cards: cardsInMotion.cards,
+                                    fromStack: cardsInMotion.fromStack!,
+                                    fromStackNo: cardsInMotion.fromStackNo,
+                                    toStack: .Foundation,
+                                    toStackNo: stackNo)
+        playerMoves.append(playerMove)
+      }
     } else {
       fatalError("Cannot move cards in motion to final stack")
     }
@@ -246,17 +256,26 @@ extension GameScene {
     
     // Animate cards on foundations
     var delay = TimeInterval(0.5)
+    let cardFlight = TimeInterval(2)
     for cardFoundation in cardFoundations {
-      for card in cardFoundation.pile {
+      for card in cardFoundation.pile.reversed() {
         let delayAnim = SKAction.wait(forDuration: delay)
         let jumpTo = SKAction.jump(toHeight: card.size.height * 1.5,
                                    fromPosition: card.position,
                                    toPosition: dealerPosition,
-                                   duration: 2)
-        let flipCard = SKAction.run {
-          card.flipOver(withAnimation: true,
-                        animSpeed: self.cardAnimSpeed)
+                                   duration: cardFlight)
+        let flipCard0 = SKAction.scaleX(to: 0, duration: cardFlight / 4)
+        let flipCardFace = SKAction.run {
+          card.flipOver()
         }
+        let flipCard_1 = SKAction.scaleX(to: -1, duration: cardFlight / 4)
+        let flipCard1 = SKAction.scaleX(to: 1, duration: cardFlight / 4)
+        let flipCard = SKAction.sequence([flipCard0,
+                                          flipCardFace,
+                                          flipCard_1,
+                                          flipCard0,
+                                          flipCardFace,
+                                          flipCard1])
         let groupAction = SKAction.group([jumpTo, flipCard])
         card.run(SKAction.sequence([delayAnim, groupAction]))
         delay += cardAnimSpeed
@@ -285,11 +304,11 @@ extension GameScene {
     youWinLabel.run(scaleSeq)
     
     // Play applause
-    audioHelper.fadeOutSound(name: AudioName.background,
+    audioHelper.fadeOutSound(name: AudioName.Background,
                              fadeDuration: 1,
                              andStop: true)
     runAfter(delay: 0.5) {
-      self.audioHelper.playSound(name: AudioName.applause)
+      self.audioHelper.playSound(name: AudioName.Applause)
     }
     
   } // animateWinning

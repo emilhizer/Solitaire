@@ -1,5 +1,5 @@
 //
-//  GameScene+VolumeChanged.swift
+//  GameScene+SettingsChanged.swift
 //  Solitaire
 //
 //  Created by Eric Milhizer on 2/22/18.
@@ -8,19 +8,19 @@
 
 import Foundation
 
-extension GameScene: VolumeChangedDelegate {
+extension GameScene: SettingsChangedDelegate {
   
   func volumeChanged(to level: Float) {
     backgroundVolume = level
-    audioHelper.setSoundVolume(ofSound: AudioName.background,
+    audioHelper.setSoundVolume(ofSound: AudioName.Background,
                                to: level)
   } // volumeChanged
 
   func fxVolumeChanged(to level: Float) {
     soundFXVolume = level
-    audioHelper.setSoundVolume(ofSound: AudioName.cardShuffle,
+    audioHelper.setSoundVolume(ofSound: AudioName.CardShuffle,
                                to: level)
-    audioHelper.setSoundVolume(ofSound: AudioName.applause,
+    audioHelper.setSoundVolume(ofSound: AudioName.Applause,
                                to: level)
     for dealSound in dealSounds {
       audioHelper.setSoundVolume(ofSound: dealSound,
@@ -29,6 +29,17 @@ extension GameScene: VolumeChangedDelegate {
     let randomDeal = dealSounds[Int.random(dealSounds.count)]
     audioHelper.playSound(name: randomDeal,
                           withVolume: level)
-  } // volumeChanged
+  } // fxVolumeChanged
+  
+  func bigCardsChanged(to bigCards: Bool) {
+    //
+  }
+  
+  func settingsExited() {
+    print("\n-- Saving settings to User Defaults --\n")
+    UserDefaults.standard.set(backgroundVolume, forKey: UDKeys.BgVolume)
+    UserDefaults.standard.set(soundFXVolume, forKey: UDKeys.FXVolume)
+    UserDefaults.standard.set(useBigCards, forKey: UDKeys.BigCards)
+  } // settingsExited
 
-} // extension GameScene+VolumeChanged
+} // extension GameScene+SettingsChanged

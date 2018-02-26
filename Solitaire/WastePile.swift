@@ -176,7 +176,7 @@ class WastePile {
   
   func resetPile(toPosition stockPosition: CGPoint, withAnimSpeed animSpeed: TimeInterval = 0, delay: TimeInterval = 0) -> [Card]? {
     if pile.count > 0 {
-      let animTime = animSpeed / TimeInterval(min(pile.count, 10))
+      let animTime = animSpeed / TimeInterval(min(pile.count, 4))
       var newZPos = CGFloat(10)
       var newDelay = delay
       for card in pile.reversed() {

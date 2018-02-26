@@ -61,6 +61,7 @@ class GameScene: SKScene {
   var replayDeck: CardDeck?
   var feltImage = "Feltr2"
   var cardBackImage = "CardBackNU"
+  var useBigCards = false
   var cardPadPercent = CGFloat(0.1)
   var cardHSpacing = CGFloat(0)
   var cardVSpacing = CGFloat(0)
@@ -81,10 +82,10 @@ class GameScene: SKScene {
   let audioHelper = AudioHelper.sharedInstance
   var dealSounds = [String]()
   enum AudioName {
-    static var dealBaseName = "carddeal"
-    static var cardShuffle = "cardshuffle"
-    static var background = "background"
-    static var applause = "applause"
+    static var DealBaseName = "carddeal"
+    static var CardShuffle = "cardshuffle"
+    static var Background = "background"
+    static var Applause = "applause"
   }
   var backgroundVolume: Float = 0.4
   var soundFXVolume: Float = 0.6
@@ -123,6 +124,13 @@ class GameScene: SKScene {
     }
   } // CardsInMotion
   var cardsInMotion = CardsInMotion()
+  
+  // User Default Keys
+  enum UDKeys {
+    static var BgVolume = "Settings.BgVolume"
+    static var FXVolume = "Settings.FXVolume"
+    static var BigCards = "BigCards"
+  }
 
   
   // MARK: - Init and Setup
@@ -130,6 +138,9 @@ class GameScene: SKScene {
     
     print("Init: Load game data")
     loadGameInitData()
+    
+    print("Init: Get User Defaults")
+    getSavedDefaults()
     
     print("Init: Setup background")
     setupBackground()
@@ -157,29 +168,6 @@ class GameScene: SKScene {
     print("Init: Setup Cards")
     setupCards()
     
-    /// -------------------
-    /*
-    let jumpHeight = CGFloat(100)
-    if let card = currentDeck.getCard() {
-      card.position = CGPoint(x: 0, y: jumpHeight)
-      addChild(card)
-    }
-    
-    if let card = currentDeck.getCard() {
-      card.position = CGPoint.zero
-      addChild(card)
-      let printAction = SKAction.run {
-        print("Card pos: \(card.position)")
-      }
-      let jump = SKAction.jump(toHeight: jumpHeight,
-                               fromPosition: card.position,
-                               toPosition: CGPoint(x: card.position.x+0, y: card.position.y),
-                               duration: 3)
-      card.run(SKAction.sequence([printAction, jump, printAction]))
-    }
-    */
-    /// -------------------
-    
     print("Init: Start new game")
     startNewGame()
     
@@ -192,6 +180,18 @@ class GameScene: SKScene {
       fatalError("Could Not Load Game Data 'GameData.plist'")
     }
   } // loadGameInitData
+  
+  func getSavedDefaults() {
+    if let backgroundVolume = UserDefaults.standard.object(forKey: UDKeys.BgVolume) as? Float {
+      self.backgroundVolume = backgroundVolume
+    }
+    if let soundFXVolume = UserDefaults.standard.object(forKey: UDKeys.FXVolume) as? Float {
+      self.soundFXVolume = soundFXVolume
+    }
+    if let useBigCards = UserDefaults.standard.object(forKey: UDKeys.BigCards) as? Bool {
+      self.useBigCards = useBigCards
+    }
+  } // getSavedDefaults
   
   func setupBackground() {
     let background = SKSpriteNode(imageNamed: feltImage)
@@ -214,26 +214,26 @@ class GameScene: SKScene {
   } // setupBackground()
   
   func setupAudio() {
-    audioHelper.setupGameSound(name: AudioName.background,
+    audioHelper.setupGameSound(name: AudioName.Background,
                                fileNamed: "BigChill.m4a",
                                withVolume: 0,
                                isBackground: true)
     
-    audioHelper.playSound(name: AudioName.background,
+    audioHelper.playSound(name: AudioName.Background,
                           fadeDuration: 0)
     runAfter(delay: 0.1) {
-      self.audioHelper.playSound(name: AudioName.background,
+      self.audioHelper.playSound(name: AudioName.Background,
                                  withVolume: self.backgroundVolume,
                                  fadeDuration: 1)
     }
-    audioHelper.setupGameSound(name: AudioName.cardShuffle,
+    audioHelper.setupGameSound(name: AudioName.CardShuffle,
                                fileNamed: "cardshuffle.m4a",
                                withVolume: soundFXVolume)
-    audioHelper.setupGameSound(name: AudioName.applause,
+    audioHelper.setupGameSound(name: AudioName.Applause,
                                fileNamed: "SmallCrowdApplause.m4a",
                                withVolume: soundFXVolume)
     for i in 0...9 {
-      let dealName = AudioName.dealBaseName + "\(i)"
+      let dealName = AudioName.DealBaseName + "\(i)"
       audioHelper.setupGameSound(name: dealName,
                                  fileNamed: "\(dealName).m4a",
                                  withVolume: soundFXVolume)
@@ -244,7 +244,7 @@ class GameScene: SKScene {
   func setupHUD() {
     hud = HUD(size: size, hide: false)
     addChild(hud)
-    hud.volumeChangedDelegate = self
+    hud.settingsChangedDelegate = self
     hud.setVolume(to: backgroundVolume)
     hud.setFXVolume(to: soundFXVolume)
   } // setupHUD
@@ -267,6 +267,7 @@ class GameScene: SKScene {
     for card in currentDeck.unusedCards {
       card.setSize(to: cardSize)
       card.faceDown()
+      card.isHidden = true
     }
 
     cardHSpacing = (size.width * cardPadPercent) / (CGFloat(cardsAcross) + 1)
@@ -364,9 +365,13 @@ class GameScene: SKScene {
   
   func restartGame(reshuffle: Bool) {
     let gameScene = GameScene(size: size)
+    
     if !reshuffle {
       gameScene.replayDeck = originalDeck
     }
+//    gameScene.backgroundVolume = backgroundVolume
+//    gameScene.soundFXVolume = soundFXVolume
+    
     gameScene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
     gameScene.scaleMode = .aspectFill
     let transition = SKTransition.fade(withDuration: 1.5)
@@ -399,6 +404,7 @@ class GameScene: SKScene {
           card.stackNumber = tableauCol
           card.position = dealerPosition
           card.zPosition = 1000
+          card.isHidden = false
 
           delay += cardAnimSpeed // * TimeInterval(cardCount)
           tableaus[tableauCol].add(card: card,
