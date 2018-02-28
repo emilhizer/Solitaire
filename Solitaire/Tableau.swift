@@ -91,6 +91,9 @@ class Tableau {
     //   so we can animate from initial pos to final pos
     let moveToStart = SKAction.move(to: initialPosition, duration: 0)
     let delayAction = SKAction.wait(forDuration: delay)
+    let unhideAction = SKAction.run {
+      card.isHidden = false
+    }
     let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
     moveToFinal.timingMode = .easeOut
     var groupMove: SKAction
@@ -105,7 +108,7 @@ class Tableau {
         self.wiggleCard(card: card, withAnimSpeed: animSpeed)
       }
     }
-    card.run(SKAction.sequence([moveToStart, delayAction, groupMove, runAfter]))
+    card.run(SKAction.sequence([moveToStart, delayAction, unhideAction, groupMove, runAfter]))
 
   } // add:card
   

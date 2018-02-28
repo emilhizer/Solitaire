@@ -369,8 +369,6 @@ class GameScene: SKScene {
     if !reshuffle {
       gameScene.replayDeck = originalDeck
     }
-//    gameScene.backgroundVolume = backgroundVolume
-//    gameScene.soundFXVolume = soundFXVolume
     
     gameScene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
     gameScene.scaleMode = .aspectFill
@@ -380,15 +378,6 @@ class GameScene: SKScene {
   
   func deal() {
     var delay = TimeInterval(0)
-    
-//    for _ in 0...0 {
-//      runAfter(delay: delay) {
-//        self.audioHelper.playSound(name: AudioName.cardShuffle,
-//                              withVolume: self.soundFXVolume)
-//      }
-//      delay += audioHelper.duration(ofSound: AudioName.cardShuffle) +
-//               TimeInterval(0.5)
-//    }
     
     var cardCount = 0
     for tableauRow in 0..<cardsAcross {
@@ -404,8 +393,8 @@ class GameScene: SKScene {
           card.stackNumber = tableauCol
           card.position = dealerPosition
           card.zPosition = 1000
-          card.isHidden = false
-
+          card.isHidden = true
+          
           delay += cardAnimSpeed // * TimeInterval(cardCount)
           tableaus[tableauCol].add(card: card,
                                    withAnimSpeed: cardAnimSpeed,

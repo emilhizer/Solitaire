@@ -385,13 +385,38 @@ extension GameScene {
     let ds = firstTouchPos.distanceTo(pos)
 
     var isTapped = false
+    // Tapped = time from touch down to up is < 800ms and distance < 10pxls
+    //  Else, it's a move (not a tap)
     if (touchStarted > 0) && (dt < 0.8) && (ds < 10) {
       print(" -- Tapped !!!")
       isTapped = true
       if let card = cardTouched {
+        // Can't have any cards in motion to be "real" card tapped
         if cardsInMotion.cards.count == 0 {
           startMovingCards(startingWithCard: card)
-        }
+          
+          // If card is from tableau but can't be moved then see
+          //  if any cards upwards on the tableau up pile can be
+          //  moved
+          // 1. Check if tapped card is from tableau
+          if let stackNumber = card.stackNumber, card.onStack == .Tableau {
+            // 2. Check if card can be moved to foundation or another tableau
+            while (canMove(toStack: .Foundation, checkDistance: false) == nil) &&
+              (canMove(toStack: .Tableau, checkDistance: false) == nil) {
+                // 3. No move found, try to get next card (upward) on tableau up pile
+                if let nextCardUp = tableaus[stackNumber].pileUp.last {
+                  tableaus[stackNumber].add(cards: cardsInMotion.cards)
+                  startMovingCards(startingWithCard: nextCardUp)
+                } else {
+                // 4. If there's no "next card", then return to original card and break
+                  tableaus[stackNumber].add(cards: cardsInMotion.cards)
+                  startMovingCards(startingWithCard: card)
+                  break
+                }
+            } // card tapped not moveable
+          } // tapped card is from tableau
+          
+        } // no cards in motion prior to tap (saftey check!)
       } // valid card tapped
     } // playing board tapped
     
@@ -425,7 +450,7 @@ extension GameScene {
         else {
           fatalError("Cards in motion but not from stack / stack number")
         }
-        
+
         // Check if can move cards to foundation
         if let foundationNo = canMove(toStack: .Foundation, checkDistance: !isTapped) {
           moveCards(toStack: .Foundation, stackNumber: foundationNo)
@@ -450,7 +475,7 @@ extension GameScene {
             bumpWastePile()
           }
         } // can move cards to Tableau
-        
+
         // Else move cards back to original location
         else {
           if cardsInMotion.fromStack! == .Waste {

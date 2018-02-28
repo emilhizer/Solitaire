@@ -42,6 +42,7 @@
 		0F798828202F42E9002E3BD4 /* UIColor+AppleColoredPencils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F798825202F42E9002E3BD4 /* UIColor+AppleColoredPencils.swift */; };
 		0F798829202F42E9002E3BD4 /* UIColor+Pantone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F798826202F42E9002E3BD4 /* UIColor+Pantone.swift */; };
 		0F79882B202F5117002E3BD4 /* GameScene+Undo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F79882A202F5117002E3BD4 /* GameScene+Undo.swift */; };
+		0F91260C2046745C00C4FC02 /* CardsBigFaced.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F91260B2046745C00C4FC02 /* CardsBigFaced.xcassets */; };
 		0FCD8684203FAA810011A2FF /* AudioHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCD8683203FAA810011A2FF /* AudioHelper.swift */; };
 		0FCD8686203FD00A0011A2FF /* Float+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCD8685203FD00A0011A2FF /* Float+Extensions.swift */; };
 		0FCD8688203FD6CF0011A2FF /* GameScene+SettingsChanged.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCD8687203FD6CF0011A2FF /* GameScene+SettingsChanged.swift */; };
@@ -99,6 +100,7 @@
 		0F798825202F42E9002E3BD4 /* UIColor+AppleColoredPencils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+AppleColoredPencils.swift"; sourceTree = "<group>"; };
 		0F798826202F42E9002E3BD4 /* UIColor+Pantone.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Pantone.swift"; sourceTree = "<group>"; };
 		0F79882A202F5117002E3BD4 /* GameScene+Undo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+Undo.swift"; sourceTree = "<group>"; };
+		0F91260B2046745C00C4FC02 /* CardsBigFaced.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = CardsBigFaced.xcassets; sourceTree = "<group>"; };
 		0FCD8683203FAA810011A2FF /* AudioHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioHelper.swift; sourceTree = "<group>"; };
 		0FCD8685203FD00A0011A2FF /* Float+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Float+Extensions.swift"; sourceTree = "<group>"; };
 		0FCD8687203FD6CF0011A2FF /* GameScene+SettingsChanged.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+SettingsChanged.swift"; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 				0F42556F201573420071BA41 /* Assets.xcassets */,
 				0F42557D201596B80071BA41 /* Cards.xcassets */,
 				0F53C329203BD8EF00081FC6 /* SettingsMenu.xcassets */,
+				0F91260B2046745C00C4FC02 /* CardsBigFaced.xcassets */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -312,6 +315,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0F91260C2046745C00C4FC02 /* CardsBigFaced.xcassets in Resources */,
 				0F67CD4A203E8BD1004A1DF8 /* carddeal3.m4a in Resources */,
 				0F67CD4E203E8BD1004A1DF8 /* carddeal8.m4a in Resources */,
 				0F67CD4D203E8BD1004A1DF8 /* carddeal2.m4a in Resources */,
