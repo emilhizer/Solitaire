@@ -424,22 +424,10 @@
 			</dict>
 		</array>
 	</dict>
-	<key>Games</key>
+	<key>Settings</key>
 	<dict>
-		<key>Klondike</key>
-		<dict>
-			<key>CardsToUse</key>
-			<array>
-				<string>52PlayingCardDeck</string>
-			</array>
-			<key>Settings</key>
-			<dict>
-				<key>CardSizePhone</key>
-				<integer>1</integer>
-				<key>CardSizePad</key>
-				<integer>1</integer>
-			</dict>
-		</dict>
+		<key>AltFaceSuffix</key>
+		<string>_big</string>
 	</dict>
 </dict>
 </plist>

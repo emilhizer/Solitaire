@@ -62,6 +62,7 @@ class GameScene: SKScene {
   var feltImage = "Feltr2"
   var cardBackImage = "CardBackNU"
   var useBigCards = false
+  var altFaceSuffix: String?
   var cardPadPercent = CGFloat(0.1)
   var cardHSpacing = CGFloat(0)
   var cardVSpacing = CGFloat(0)
@@ -179,6 +180,8 @@ class GameScene: SKScene {
     } else {
       fatalError("Could Not Load Game Data 'GameData.plist'")
     }
+    
+    parseGameSettings(fromPList: gameInitData)
   } // loadGameInitData
   
   func getSavedDefaults() {

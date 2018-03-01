@@ -24,7 +24,7 @@ extension GameScene {
       print("Number of decks found: \(cardDecks.count)")
     } // "Cards" dictionary
     
-  } // parsePropertyList
+  } // parseCardsData
   
   func parseDeck(withCards cards: [[String: Any]]) -> [Card] {
     var cardDeck = [Card]()
@@ -47,9 +47,15 @@ extension GameScene {
           fatalError("Unknown suit found parsing cards dictionary: \(suitName)")
         } // turn suit string to enum
         
+        var altFrontImage: String?
+        if let altFaceSuffix = altFaceSuffix {
+          altFrontImage = frontImage + altFaceSuffix
+        }
+        
         let newCard = Card(suit: cardSuit,
                            value: value,
                            frontImage: frontImage,
+                           altFrontImage: altFrontImage,
                            backImage: cardBackImage)
         
         cardDeck.append(newCard)
@@ -59,6 +65,17 @@ extension GameScene {
     return cardDeck
   } // deckDict2Deck
   
+  func parseGameSettings(fromPList plist: [String: Any]) {
+    print("-- Parsing Game Settings Data")
+    if let settingsDict = plist["Settings"] as? [String: Any] {
+      if let altFaceSuffix = settingsDict["AltFaceSuffix"] as? String {
+        self.altFaceSuffix = altFaceSuffix
+        print("  -- Found Alt Face Suffix: \(altFaceSuffix)")
+      }
+    } // "Settings" dictionary
+    
+  } // parseGameSettings
+
   
   // MARK: - Get Property List from .plist file
   func getPList(fromFile fileName: String) -> [String: Any]? {

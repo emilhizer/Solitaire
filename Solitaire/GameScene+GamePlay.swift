@@ -391,32 +391,32 @@ extension GameScene {
       print(" -- Tapped !!!")
       isTapped = true
       if let card = cardTouched {
-        // Can't have any cards in motion to be "real" card tapped
+        // May not have any cards in motion on "perfect" tap
         if cardsInMotion.cards.count == 0 {
           startMovingCards(startingWithCard: card)
+        } // no cards in motion prior to tap
+
+        // If card is from tableau but can't be moved then see
+        //  if any cards upwards on the tableau up pile can be
+        //  moved
+        // 1. Check if tapped card is from tableau
+        if let stackNumber = card.stackNumber, card.onStack == .Tableau {
+          // 2. Check if card can be moved to foundation or another tableau
+          while (canMove(toStack: .Foundation, checkDistance: false) == nil) &&
+            (canMove(toStack: .Tableau, checkDistance: false) == nil) {
+              // 3. No move found, try to get next card (upward) on tableau up pile
+              if let nextCardUp = tableaus[stackNumber].pileUp.last {
+                tableaus[stackNumber].add(cards: cardsInMotion.cards)
+                startMovingCards(startingWithCard: nextCardUp)
+              } else {
+              // 4. If there's no "next card", then return to original card and break
+                tableaus[stackNumber].add(cards: cardsInMotion.cards)
+                startMovingCards(startingWithCard: card)
+                break
+              }
+          } // card tapped not moveable
+        } // tapped card is from tableau
           
-          // If card is from tableau but can't be moved then see
-          //  if any cards upwards on the tableau up pile can be
-          //  moved
-          // 1. Check if tapped card is from tableau
-          if let stackNumber = card.stackNumber, card.onStack == .Tableau {
-            // 2. Check if card can be moved to foundation or another tableau
-            while (canMove(toStack: .Foundation, checkDistance: false) == nil) &&
-              (canMove(toStack: .Tableau, checkDistance: false) == nil) {
-                // 3. No move found, try to get next card (upward) on tableau up pile
-                if let nextCardUp = tableaus[stackNumber].pileUp.last {
-                  tableaus[stackNumber].add(cards: cardsInMotion.cards)
-                  startMovingCards(startingWithCard: nextCardUp)
-                } else {
-                // 4. If there's no "next card", then return to original card and break
-                  tableaus[stackNumber].add(cards: cardsInMotion.cards)
-                  startMovingCards(startingWithCard: card)
-                  break
-                }
-            } // card tapped not moveable
-          } // tapped card is from tableau
-          
-        } // no cards in motion prior to tap (saftey check!)
       } // valid card tapped
     } // playing board tapped
     

@@ -52,11 +52,13 @@ class Card: SKSpriteNode {
   var isTopOfWaste = false
   
   private var frontImageName: String
+  private var altFrontImageName: String?
   private var backImageName: String
   private var frontBackgroundName: String
 
   private var frontBackground: SKTexture
   private var frontTexture: SKTexture
+  private var altFrontTexture: SKTexture?
   private var backTexture: SKTexture
   
   private var frontFaceNode: SKSpriteNode!
@@ -67,9 +69,10 @@ class Card: SKSpriteNode {
     fatalError("init(coder:) has not been implemented")
   }
   
-  init(suit: Suit, value: Int, frontImage: String, backImage: String, frontBackground: String = "CardFrontTexture") {
+  init(suit: Suit, value: Int, frontImage: String, altFrontImage: String? = nil, backImage: String, frontBackground: String = "CardFrontTexture") {
 
     self.frontImageName = frontImage
+    self.altFrontImageName = altFrontImage
     self.backImageName = backImage
     self.frontBackgroundName = frontBackground
     
@@ -77,6 +80,9 @@ class Card: SKSpriteNode {
     self.suit = suit
     self.value = value
     frontTexture = SKTexture(imageNamed: frontImage)
+    if let altFrontImage = altFrontImage {
+      altFrontTexture = SKTexture(imageNamed: altFrontImage)
+    }
     backTexture = SKTexture(imageNamed: backImage)
     
     super.init(texture: self.frontBackground,
@@ -146,10 +152,23 @@ class Card: SKSpriteNode {
     }
   } // faceUp
   
+  func useAltImage() {
+    print("-- Use Alt Card Image")
+    if let altFontTexture = altFrontTexture {
+      print("-- -- Alt Card Texture Found")
+      frontFaceNode.texture! = altFontTexture
+    }
+  } // useAltImage
+  
+  func useMainImage() {
+    frontFaceNode.texture! = frontTexture
+  } // useMainImage
+  
   override func copy() -> Any {
     return Card(suit: self.suit,
                 value: self.value,
                 frontImage: self.frontImageName,
+                altFrontImage: self.altFrontImageName,
                 backImage: self.backImageName,
                 frontBackground: self.frontBackgroundName)
   }

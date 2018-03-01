@@ -32,10 +32,26 @@ extension GameScene: SettingsChangedDelegate {
   } // fxVolumeChanged
   
   func bigCardsChanged(to bigCards: Bool) {
-    //
-  }
+    useBigCards = bigCards
+  } // bigCardsChanged
   
   func settingsExited() {
+    // Change face of cards
+    for card in currentDeck.unusedCards {
+      if useBigCards {
+        card.useAltImage()
+      } else {
+        card.useMainImage()
+      }
+    } // unusedCards
+    for card in currentDeck.usedCards {
+      if useBigCards {
+        card.useAltImage()
+      } else {
+        card.useMainImage()
+      }
+    } // usedCards
+
     print("\n-- Saving settings to User Defaults --\n")
     UserDefaults.standard.set(backgroundVolume, forKey: UDKeys.BgVolume)
     UserDefaults.standard.set(soundFXVolume, forKey: UDKeys.FXVolume)
