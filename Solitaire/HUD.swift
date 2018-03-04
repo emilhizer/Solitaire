@@ -57,10 +57,17 @@ class HUD: SKNode {
     let buttonSize = CGSize(width: hudSize.width / 15,
                             height: hudSize.width / 15)
     let buttonSpacing = hudSize.width / 15
-    let topRowRightPos = CGPoint(x: (hudSize.width / 2) - ((buttonSpacing + buttonSize.width) / 2),
+    var topRowRightPos = CGPoint(x: (hudSize.width / 2) - ((buttonSpacing + buttonSize.width) / 2),
                                  y: (hudSize.height / 2) - ((buttonSpacing + buttonSize.height) / 2))
-    let topRowLeftPos = CGPoint(x: -(hudSize.width / 2) + ((buttonSpacing + buttonSize.width) / 2),
+    var topRowLeftPos = CGPoint(x: -(hudSize.width / 2) + ((buttonSpacing + buttonSize.width) / 2),
                                 y: (hudSize.height / 2) - ((buttonSpacing + buttonSize.height) / 2))
+    
+    // Account for iPhone X having 30 pxl notch at top
+    let deviceModel = UIDevice().type
+    if deviceModel == .iPhoneX {
+      topRowRightPos.y -= 30
+      topRowLeftPos.y -= 30
+    }
     
     var buttonPosition = topRowRightPos
 

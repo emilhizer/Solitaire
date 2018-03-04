@@ -19,6 +19,7 @@
 		0F425580201597D40071BA41 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F42557F201597D40071BA41 /* Card.swift */; };
 		0F42558320159C000071BA41 /* GameData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0F42558220159C000071BA41 /* GameData.plist */; };
 		0F4255A92015AB410071BA41 /* GameScene+PropertyLists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4255A82015AB410071BA41 /* GameScene+PropertyLists.swift */; };
+		0F42A013204B5EE200ADAA44 /* UIDevice+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F42A012204B5EE200ADAA44 /* UIDevice+Extensions.swift */; };
 		0F53C32A203BD8EF00081FC6 /* SettingsMenu.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F53C329203BD8EF00081FC6 /* SettingsMenu.xcassets */; };
 		0F66F14220329A1C00A3EFDE /* HUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F66F14120329A1C00A3EFDE /* HUD.swift */; };
 		0F67CD37203E8B8A004A1DF8 /* BigChill.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 0F67CD36203E8B8A004A1DF8 /* BigChill.m4a */; };
@@ -77,6 +78,7 @@
 		0F42557F201597D40071BA41 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		0F42558220159C000071BA41 /* GameData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = GameData.plist; sourceTree = "<group>"; };
 		0F4255A82015AB410071BA41 /* GameScene+PropertyLists.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+PropertyLists.swift"; sourceTree = "<group>"; };
+		0F42A012204B5EE200ADAA44 /* UIDevice+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Extensions.swift"; sourceTree = "<group>"; };
 		0F53C329203BD8EF00081FC6 /* SettingsMenu.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SettingsMenu.xcassets; sourceTree = "<group>"; };
 		0F66F14120329A1C00A3EFDE /* HUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUD.swift; sourceTree = "<group>"; };
 		0F67CD36203E8B8A004A1DF8 /* BigChill.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = BigChill.m4a; sourceTree = "<group>"; };
@@ -252,6 +254,7 @@
 				0F798824202F42E9002E3BD4 /* UIColor+CrayolaCrayons.swift */,
 				0F798826202F42E9002E3BD4 /* UIColor+Pantone.swift */,
 				0FD47FA12041B4D600AE82D7 /* NSObject+Extensions.swift */,
+				0F42A012204B5EE200ADAA44 /* UIDevice+Extensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -376,6 +379,7 @@
 				0F66F14220329A1C00A3EFDE /* HUD.swift in Sources */,
 				0FCD8688203FD6CF0011A2FF /* GameScene+SettingsChanged.swift in Sources */,
 				0F6D088F201CE1F5000D56DC /* Tableau.swift in Sources */,
+				0F42A013204B5EE200ADAA44 /* UIDevice+Extensions.swift in Sources */,
 				0FCD8684203FAA810011A2FF /* AudioHelper.swift in Sources */,
 				0FE151862016F46D00FC8D2A /* Int+Extensions.swift in Sources */,
 			);

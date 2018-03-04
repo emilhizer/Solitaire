@@ -48,9 +48,6 @@ class WastePile {
     threeUpPositions.append(nextPostion)
     nextPostion += CGPoint(x: spacing, y: 0)
     threeUpPositions.append(nextPostion)
-    print(" -- Waste Base Position: \(basePosition)")
-    print(" -- -- Three Up Positions: \(threeUpPositions)")
-    print(" -- Card Spacing: \(spacing)")
   } // init
   
   

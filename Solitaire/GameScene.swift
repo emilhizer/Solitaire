@@ -274,13 +274,18 @@ class GameScene: SKScene {
     }
 
     cardHSpacing = (size.width * cardPadPercent) / (CGFloat(cardsAcross) + 1)
-    cardVSpacing = cardSize.height * 0.2
+    cardVSpacing = cardSize.height * 0.3
     
     print("Size: (\(size.width), \(size.height))")
-    print("Scene: (\(scene!.size.width), \(scene!.size.height))")
-    print("Frame: (\(frame.width), \(frame.height))")
     var foundationX = -(size.width / 2) + cardHSpacing + (cardSize.width / 2)
-    let foundationY = (size.height / 2) - (1.5 * cardSize.height)
+    var foundationY = (size.height / 2) - (1.5 * cardSize.height)
+
+    // Account for iPhone X having 30 pxl notch at top
+    let deviceModel = UIDevice().type
+    print("-- Device Model Type: \(deviceModel)")
+    if deviceModel == .iPhoneX {
+      foundationY -= 30
+    }
     print("FoundatationXY: (\(foundationX), \(foundationY)")
     for _ in 0...3 {
       let basePosition = CGPoint(x: foundationX, y: foundationY)
@@ -299,12 +304,18 @@ class GameScene: SKScene {
     }
 
     var tableauX = cardFoundations[0].basePosition.x
-    let tableauY = foundationY - (1.5 * cardSize.height)
+    var tableauYDistance: CGFloat
+    if UIDevice().userInterfaceIdiom == .phone {
+      tableauYDistance = 1.5 * cardSize.height
+    } else {
+      tableauYDistance = 1.3 * cardSize.height
+    }
+    let tableauY = foundationY - tableauYDistance
     for _ in 0..<cardsAcross {
       let basePosition = CGPoint(x: tableauX, y: tableauY)
       let newTableau = Tableau(basePosition: basePosition,
                                cardSpacing: cardVSpacing,
-                               downSpacing: cardVSpacing / 2)
+                               downSpacing: cardVSpacing / 3)
       let randSound = dealSounds[Int.random(dealSounds.count)]
       let soundFX = SKAction.run {
         self.audioHelper.playSound(name: randSound)
