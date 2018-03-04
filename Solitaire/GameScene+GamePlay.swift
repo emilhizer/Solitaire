@@ -412,43 +412,23 @@ extension GameScene {
               // 3. No move found, try to get next card (upward) on tableau up pile
               if pileUpIndexNo > 0 {
                 pileUpIndexNo -= 1
-                cardsInMotion.cards = [tableaus[stackNumber].pileUp[pileUpIndexNo]]
+                cardsInMotion.cards.insert(tableaus[stackNumber].pileUp[pileUpIndexNo],
+                                           at: 0)
               } else {
                 // 4. If there's no "next card", then no moves found
                 canMoveAnyCards = false
                 break
               }
           } // while card tapped (or upward on pile) is NOT moveable
+          // If card(s) found to be movable then set it(them) in motion
           if canMoveAnyCards {
             startMovingCards(startingWithCard: tableaus[stackNumber].pileUp[pileUpIndexNo])
           } else {
+            // Else, return cards in motion to original card(s)
             startMovingCards(startingWithCard: card)
           }
         } // tapped card is from tableau
         
-/*
-        // If card is from tableau but can't be moved then see
-        //  if any cards upwards on the tableau up pile can be
-        //  moved
-        // 1. Check if tapped card is from tableau
-        if let stackNumber = card.stackNumber, card.onStack == .Tableau {
-          // 2. Check if card can be moved to foundation or another tableau
-          while (canMove(toStack: .Foundation, checkDistance: false) == nil) &&
-            (canMove(toStack: .Tableau, checkDistance: false) == nil) {
-              // 3. No move found, try to get next card (upward) on tableau up pile
-              if let nextCardUp = tableaus[stackNumber].pileUp.last {
-                tableaus[stackNumber].add(cards: cardsInMotion.cards)
-                startMovingCards(startingWithCard: nextCardUp)
-              } else {
-                // 4. If there's no "next card", then return to original card and break
-                tableaus[stackNumber].add(cards: cardsInMotion.cards)
-                startMovingCards(startingWithCard: card)
-                break
-              }
-          } // card tapped not moveable
-        } // tapped card is from tableau
-*/
-
       } // valid card tapped
     } // playing board tapped
     

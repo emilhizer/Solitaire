@@ -250,6 +250,9 @@ class GameScene: SKScene {
     hud.settingsChangedDelegate = self
     hud.setVolume(to: backgroundVolume)
     hud.setFXVolume(to: soundFXVolume)
+    // Note: this only sets the switch
+    //  This does not change initial setup of the cards
+    hud.setBigCardSwitch(to: useBigCards)
   } // setupHUD
   
   func setupDealer() {
@@ -270,6 +273,11 @@ class GameScene: SKScene {
     for card in currentDeck.unusedCards {
       card.setSize(to: cardSize)
       card.faceDown()
+      if useBigCards {
+        card.useAltImage()
+      } else {
+        card.useMainImage()
+      }
       card.isHidden = true
     }
 

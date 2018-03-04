@@ -57,20 +57,14 @@ public enum Model : String {
 extension UIDevice {
   var type: Model {
     
-    #if (arch(i386) || arch(x86_64)) && os(iOS)
-      let DEVICE_IS_SIMULATOR = true
-    #else
-      let DEVICE_IS_SIMULATOR = false
-    #endif
-    
     var modelCode: String?
-    
-    if DEVICE_IS_SIMULATOR == true {
+
+    #if (arch(i386) || arch(x86_64)) && os(iOS)
       // this neat trick is found at http://kelan.io/2015/easier-getenv-in-swift/
       if let dir = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] {
         modelCode = dir
       }
-    } else {
+    #else
       var systemInfo = utsname()
       uname(&systemInfo)
       modelCode = withUnsafePointer(to: &systemInfo.machine) {
@@ -79,7 +73,8 @@ extension UIDevice {
           
         }
       }
-    }
+    #endif
+        
     if let modelCode = modelCode {
       print(" -- -- Raw Model Name Found: \(modelCode)")
     } else {

@@ -286,6 +286,15 @@ class HUD: SKNode {
   func hideSettings() {
     settingsMenu.isHidden = true
   } // hideSettings
+  
+  func setBigCardSwitch(to bigCards: Bool) {
+    if bigCards {
+      bigCardsButton.texture = SKTexture(imageNamed: "SwitchOn")
+    } else {
+      bigCardsButton.texture = SKTexture(imageNamed: "SwitchOff")
+    }
+    self.bigCards = bigCards
+  }
 
   func toggleBigCards() {
     if bigCards {
