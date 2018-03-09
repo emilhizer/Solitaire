@@ -90,6 +90,7 @@ class GameScene: SKScene {
   }
   var backgroundVolume: Float = 0.4
   var soundFXVolume: Float = 0.6
+  var volumeMute: Bool = false
   
   // Heads Up Display
   var hud: HUD!
@@ -128,6 +129,7 @@ class GameScene: SKScene {
   
   // User Default Keys
   enum UDKeys {
+    static var VolumeMuted = "Setting.VolumeMuted"
     static var BgVolume = "Settings.BgVolume"
     static var FXVolume = "Settings.FXVolume"
     static var BigCards = "BigCards"
@@ -185,6 +187,10 @@ class GameScene: SKScene {
   } // loadGameInitData
   
   func getSavedDefaults() {
+    if let volumeMute = UserDefaults.standard.object(forKey: UDKeys.VolumeMuted) as? Bool {
+      print("Retrieved Volume Mute, value: \(volumeMute)")
+      self.volumeMute = volumeMute
+    }
     if let backgroundVolume = UserDefaults.standard.object(forKey: UDKeys.BgVolume) as? Float {
       self.backgroundVolume = backgroundVolume
     }
@@ -224,9 +230,11 @@ class GameScene: SKScene {
     
     audioHelper.playSound(name: AudioName.Background,
                           fadeDuration: 0)
+    
+    let startingVolume = volumeMute ? 0 : backgroundVolume
     runAfter(delay: 0.1) {
       self.audioHelper.playSound(name: AudioName.Background,
-                                 withVolume: self.backgroundVolume,
+                                 withVolume: startingVolume,
                                  fadeDuration: 1)
     }
     audioHelper.setupGameSound(name: AudioName.CardShuffle,
@@ -242,6 +250,19 @@ class GameScene: SKScene {
                                  withVolume: soundFXVolume)
       dealSounds.append(dealName)
     }
+    // If volume muted then force all sound volumes to zero
+    if volumeMute {
+      audioHelper.setSoundVolume(ofSound: AudioName.Background,
+                                 to: 0)
+      audioHelper.setSoundVolume(ofSound: AudioName.CardShuffle,
+                                 to: 0)
+      audioHelper.setSoundVolume(ofSound: AudioName.Applause,
+                                 to: 0)
+      for dealSound in dealSounds {
+        audioHelper.setSoundVolume(ofSound: dealSound,
+                                   to: 0)
+      }
+    } // volume is muted
   } // setupBackgroundMusic
   
   func setupHUD() {
@@ -253,6 +274,7 @@ class GameScene: SKScene {
     // Note: this only sets the switch
     //  This does not change initial setup of the cards
     hud.setBigCardSwitch(to: useBigCards)
+    hud.setVolumeMute(to: volumeMute)
   } // setupHUD
   
   func setupDealer() {

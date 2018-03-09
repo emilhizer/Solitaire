@@ -12,6 +12,7 @@ import SpriteKit
 
 // MARK: - Protocols
 protocol SettingsChangedDelegate: class {
+  func volumeMuteChanged(to volumeMute: Bool)
   func volumeChanged(to level: Float)
   func fxVolumeChanged(to level: Float)
   func bigCardsChanged(to bigCards: Bool)
@@ -29,10 +30,14 @@ class HUD: SKNode {
   var hudSize: CGSize!
   var undoButton: SKSpriteNode!
   var newGameButton: SKSpriteNode!
-  var pauseButton: SKSpriteNode!
+//  var pauseButton: SKSpriteNode!
   var replayButton: SKSpriteNode!
+  var autoplayButton: SKSpriteNode!
+  var autoplayShine: SKSpriteNode!
   var settingsButton: SKSpriteNode!
-  
+  var volumeMuteButton: SKSpriteNode!
+  var volumeMute: Bool = false
+
   var settingsMenu = SKNode()
   var settingsExit: SKSpriteNode!
   var bgVolumeSlider: SKSpriteNode!
@@ -97,22 +102,65 @@ class HUD: SKNode {
     newGameButton.zPosition = zPosition + 1
     addChild(newGameButton)
 
-    buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
-    pauseButton = SKSpriteNode(imageNamed: "PauseButton")
-    pauseButton.name = "PauseButton"
-    pauseButton.size = buttonSize
-    pauseButton.position = buttonPosition
-    pauseButton.zPosition = zPosition + 1
+//    buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
+//    pauseButton = SKSpriteNode(imageNamed: "PauseButton")
+//    pauseButton.name = "PauseButton"
+//    pauseButton.size = buttonSize
+//    pauseButton.position = buttonPosition
+//    pauseButton.zPosition = zPosition + 1
 //    addChild(pauseButton)
+    
+    buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
+    autoplayButton = SKSpriteNode(imageNamed: "play")
+    let heightRatio = autoplayButton.size.height / buttonSize.height
+    autoplayButton.name = "AutoplayButton"
+    autoplayButton.size = buttonSize
+    autoplayButton.position = buttonPosition
+    autoplayButton.zPosition = zPosition + 1
+    autoplayButton.isHidden = true
+    addChild(autoplayButton)
+    
+    autoplayShine = SKSpriteNode(imageNamed: "play-shine")
+    autoplayShine.name = "AutoplayButton"
+    autoplayShine.size = CGSize(width: autoplayShine.size.width / heightRatio,
+                                height: autoplayShine.size.height / heightRatio)
+    autoplayShine.anchorPoint = CGPoint(x: 0.5, y: 0)
+    autoplayShine.position = CGPoint.zero
+    autoplayShine.zPosition = zPosition + 10
+    autoplayButton.addChild(autoplayShine)
+    
+    let swirlAction = SKAction.rotate(byAngle: -π, duration: 0.5)
+    let fadeIn = SKAction.fadeIn(withDuration: 0.5)
+    fadeIn.timingMode = .easeOut
+    let group1 = SKAction.group([swirlAction, fadeIn])
+    let fadeOut = SKAction.fadeOut(withDuration: 0.5)
+    fadeOut.timingMode = .easeIn
+    let group2 = SKAction.group([swirlAction, fadeOut])
+    let hide = SKAction.hide()
+    let wait = SKAction.wait(forDuration: 1)
+    let show = SKAction.unhide()
+    let sequence = SKAction.sequence([group1, group2, hide, wait, show])
+    let foreverAction = SKAction.repeatForever(sequence)
+    autoplayShine.run(foreverAction)
 
     buttonPosition = topRowLeftPos
-    settingsButton = SKSpriteNode(imageNamed: "SettingsButton")
+//    settingsButton = SKSpriteNode(imageNamed: "SettingsButton")
+    settingsButton = SKSpriteNode(imageNamed: "settings")
     settingsButton.name = "SettingsButton"
     settingsButton.size = buttonSize
     settingsButton.position = buttonPosition
     settingsButton.zPosition = zPosition + 1
     addChild(settingsButton)
 
+    buttonPosition += CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
+    volumeMuteButton = SKSpriteNode(imageNamed: "volume_on")
+    volumeMuteButton.name = "VolumeMute"
+    volumeMuteButton.size = buttonSize
+    volumeMuteButton.position = buttonPosition
+    volumeMuteButton.zPosition = zPosition + 1
+    addChild(volumeMuteButton)
+
+    
     settingsMenu.name = "SettingsMenu"
     settingsMenu.isHidden = true
     settingsMenu.zPosition = zPosition + 100
@@ -124,7 +172,7 @@ class HUD: SKNode {
                                            size: hudSize))
     grayOut.fillColor = .darkGray
     grayOut.alpha = 0.9
-    grayOut.name = "GrayOut"
+    grayOut.name = "SettingsExit"
     grayOut.zPosition = 1
     settingsMenu.addChild(grayOut)
 
@@ -211,6 +259,14 @@ class HUD: SKNode {
 
   } // init:size
   
+  func showAutoplayButton() {
+    autoplayButton.alpha = 0
+    autoplayButton.isHidden = false
+    let fadeIn = SKAction.fadeIn(withDuration: 1)
+    fadeIn.timingMode = .easeIn
+    autoplayButton.run(fadeIn)
+  } // showAutoPlayButton
+  
   func buttonPressed(at pos: CGPoint) -> Bool {
     if let firstNode = nodes(at: pos).first, firstNode.name == "SettingsExit" {
       hideSettings()
@@ -287,6 +343,25 @@ class HUD: SKNode {
     settingsMenu.isHidden = true
   } // hideSettings
   
+  func setVolumeMute(to volumeMute: Bool) {
+    if volumeMute {
+      volumeMuteButton.texture = SKTexture(imageNamed: "volume_off")
+    } else {
+      volumeMuteButton.texture = SKTexture(imageNamed: "volume_on")
+    }
+    self.volumeMute = volumeMute
+  } // setVolumeMute
+  
+  func toggleVolumeMute() {
+    if volumeMute {
+      volumeMuteButton.texture = SKTexture(imageNamed: "volume_on")
+    } else {
+      volumeMuteButton.texture = SKTexture(imageNamed: "volume_off")
+    }
+    volumeMute = !volumeMute
+    settingsChangedDelegate?.volumeMuteChanged(to: volumeMute)
+  } // toggleVolumeMute
+  
   func setBigCardSwitch(to bigCards: Bool) {
     if bigCards {
       bigCardsButton.texture = SKTexture(imageNamed: "SwitchOn")
@@ -294,7 +369,7 @@ class HUD: SKNode {
       bigCardsButton.texture = SKTexture(imageNamed: "SwitchOff")
     }
     self.bigCards = bigCards
-  }
+  } // setBigCardSwitch
 
   func toggleBigCards() {
     if bigCards {

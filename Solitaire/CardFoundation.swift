@@ -42,12 +42,8 @@ class CardFoundation {
 
     card.position = finalPosition
 
-    var finalZPosition = CGFloat(0)
-    if let currentZTop = pile.last?.zPosition {
-      finalZPosition = currentZTop + CGFloat(10)
-    }
-    
     pile.append(card)
+    let finalZPosition = CGFloat(self.pile.count * 10)
     
     let moveToStart = SKAction.move(to: initialPosition, duration: 0)
     let delayAction = SKAction.wait(forDuration: delay)

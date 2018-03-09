@@ -57,7 +57,6 @@ class WastePile {
     guard ((cards.count > 0) && (cards.count <= 3)) else {
       fatalError("Can only add between 1 and 3 cards to Waste Pile")
     }
-    print("cards.count: \(cards.count)")
     animateCards.removeAll()
     for card in cards {
       
@@ -73,12 +72,8 @@ class WastePile {
       
       let animateCard = AnimateCard(card: card,
                                     origPos: card.position)
-      card.printCard()
-      
       addToThreeUp(card: card)
-      
-      card.printCard()
-      
+            
       animateCards.append(animateCard)
 
 //      card.onStack = .Waste
@@ -89,7 +84,6 @@ class WastePile {
       // Animate (need to add card flipping over animation !!!)
       let finalDelay = delay + (animSpeed * TimeInterval(i))
       let finalPosition = animateCards[i].card.position
-      print("i: \(i) -- Final Position: \(finalPosition)")
       let moveToStart = SKAction.move(to: animateCards[i].origPos, duration: 0)
       let delayAction = SKAction.wait(forDuration: finalDelay)
       let moveToFinal = SKAction.move(to: finalPosition, duration: animSpeed)
@@ -114,8 +108,6 @@ class WastePile {
       }
       animateCards[i].card.run(SKAction.sequence([moveToStart, delayAction, moveCombo, runFinish]))
     } // loop through (up to 3) cards
-    print("Added three cards to Waste Pile")
-    printCards(cards: threeUpCards)
   } // add:card
   
   private func addToThreeUp(card: Card) {
@@ -276,9 +268,6 @@ class WastePile {
     // Wait until reset (anim) is done then reset the three up cards
     let finalDelay = delay + (2 * animSpeed)
     resetThreeUp(withAnimSpeed: animSpeed, delay: finalDelay)
-    cards[0].afterDelay(finalDelay + animSpeed) {
-      self.printCards()
-    }
   } // resetWaste
   
   func printCards() {

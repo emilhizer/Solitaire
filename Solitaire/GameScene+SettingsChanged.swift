@@ -10,10 +10,49 @@ import Foundation
 
 extension GameScene: SettingsChangedDelegate {
   
+  func volumeMuteChanged(to volumeMute: Bool) {
+    self.volumeMute = volumeMute
+    if volumeMute {
+      audioHelper.setSoundVolume(ofSound: AudioName.Background,
+                                 to: 0)
+      audioHelper.setSoundVolume(ofSound: AudioName.CardShuffle,
+                                 to: 0)
+      audioHelper.setSoundVolume(ofSound: AudioName.Applause,
+                                 to: 0)
+      for dealSound in dealSounds {
+        audioHelper.setSoundVolume(ofSound: dealSound,
+                                   to: 0)
+      }
+    } else {
+      audioHelper.setSoundVolume(ofSound: AudioName.Background,
+                                 to: backgroundVolume)
+      audioHelper.setSoundVolume(ofSound: AudioName.CardShuffle,
+                                 to: soundFXVolume)
+      audioHelper.setSoundVolume(ofSound: AudioName.Applause,
+                                 to: soundFXVolume)
+      for dealSound in dealSounds {
+        audioHelper.setSoundVolume(ofSound: dealSound,
+                                   to: soundFXVolume)
+      }
+    }
+    print("Saving Volume Mute to UserDefaults: \(volumeMute)")
+    UserDefaults.standard.set(volumeMute, forKey: UDKeys.VolumeMuted)
+  } // volumeMuteChanged
+    
   func volumeChanged(to level: Float) {
     backgroundVolume = level
     audioHelper.setSoundVolume(ofSound: AudioName.Background,
                                to: level)
+    volumeMute = false
+    hud.setVolumeMute(to: false)
+    audioHelper.setSoundVolume(ofSound: AudioName.CardShuffle,
+                               to: soundFXVolume)
+    audioHelper.setSoundVolume(ofSound: AudioName.Applause,
+                               to: soundFXVolume)
+    for dealSound in dealSounds {
+      audioHelper.setSoundVolume(ofSound: dealSound,
+                                 to: soundFXVolume)
+    }
   } // volumeChanged
 
   func fxVolumeChanged(to level: Float) {
@@ -29,6 +68,10 @@ extension GameScene: SettingsChangedDelegate {
     let randomDeal = dealSounds[Int.random(dealSounds.count)]
     audioHelper.playSound(name: randomDeal,
                           withVolume: level)
+    volumeMute = false
+    hud.setVolumeMute(to: false)
+    audioHelper.setSoundVolume(ofSound: AudioName.Background,
+                               to: backgroundVolume)
   } // fxVolumeChanged
   
   func bigCardsChanged(to bigCards: Bool) {

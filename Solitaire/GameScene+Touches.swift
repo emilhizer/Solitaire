@@ -14,10 +14,9 @@ extension GameScene {
   
   // MARK: - Touches
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    // Determine if any nodes have actions in process
+    // Determine if any card nodes have actions in process
     var actionsInProcess = false
-    enumerateChildNodes(withName: "//*") {
-      (node, stop) in
+    enumerateChildNodes(withName: "//*") { (node, stop) in
       if node.name == "Card" && node.hasActions() {
         actionsInProcess = true
         print("Hey! Cards in motion!")

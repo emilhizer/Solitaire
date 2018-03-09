@@ -20,6 +20,7 @@
 		0F42558320159C000071BA41 /* GameData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0F42558220159C000071BA41 /* GameData.plist */; };
 		0F4255A92015AB410071BA41 /* GameScene+PropertyLists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4255A82015AB410071BA41 /* GameScene+PropertyLists.swift */; };
 		0F42A013204B5EE200ADAA44 /* UIDevice+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F42A012204B5EE200ADAA44 /* UIDevice+Extensions.swift */; };
+		0F42A015204CA76C00ADAA44 /* HUD.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F42A014204CA76C00ADAA44 /* HUD.xcassets */; };
 		0F53C32A203BD8EF00081FC6 /* SettingsMenu.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F53C329203BD8EF00081FC6 /* SettingsMenu.xcassets */; };
 		0F66F14220329A1C00A3EFDE /* HUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F66F14120329A1C00A3EFDE /* HUD.swift */; };
 		0F67CD37203E8B8A004A1DF8 /* BigChill.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 0F67CD36203E8B8A004A1DF8 /* BigChill.m4a */; };
@@ -79,6 +80,7 @@
 		0F42558220159C000071BA41 /* GameData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = GameData.plist; sourceTree = "<group>"; };
 		0F4255A82015AB410071BA41 /* GameScene+PropertyLists.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+PropertyLists.swift"; sourceTree = "<group>"; };
 		0F42A012204B5EE200ADAA44 /* UIDevice+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Extensions.swift"; sourceTree = "<group>"; };
+		0F42A014204CA76C00ADAA44 /* HUD.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = HUD.xcassets; sourceTree = "<group>"; };
 		0F53C329203BD8EF00081FC6 /* SettingsMenu.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SettingsMenu.xcassets; sourceTree = "<group>"; };
 		0F66F14120329A1C00A3EFDE /* HUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUD.swift; sourceTree = "<group>"; };
 		0F67CD36203E8B8A004A1DF8 /* BigChill.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = BigChill.m4a; sourceTree = "<group>"; };
@@ -202,6 +204,7 @@
 				0F42557D201596B80071BA41 /* Cards.xcassets */,
 				0F53C329203BD8EF00081FC6 /* SettingsMenu.xcassets */,
 				0F91260B2046745C00C4FC02 /* CardsBigFaced.xcassets */,
+				0F42A014204CA76C00ADAA44 /* HUD.xcassets */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -327,6 +330,7 @@
 				0F42557E201596B80071BA41 /* Cards.xcassets in Resources */,
 				0F425565201573420071BA41 /* GameScene.sks in Resources */,
 				0F425570201573420071BA41 /* Assets.xcassets in Resources */,
+				0F42A015204CA76C00ADAA44 /* HUD.xcassets in Resources */,
 				0F67CD46203E8BD1004A1DF8 /* carddeal4.m4a in Resources */,
 				0FD47FA620437C3100AE82D7 /* SmallCrowdApplause.m4a in Resources */,
 				0F42558320159C000071BA41 /* GameData.plist in Resources */,

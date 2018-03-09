@@ -217,7 +217,6 @@ extension GameScene {
     touchStarted = 0
     firstTouchPos = CGPoint.zero
     cardTouched = nil
-//    printUndoStack()
   } // resetTouches
 
   func printUndoStack() {
@@ -249,8 +248,64 @@ extension GameScene {
       gameState = .Ending
       print("Winner, winner, chicken dinner!!!")
       animateWinning()
-    }
+    } else {
+      // Check to see if we can autowin
+      if currentDeck.unusedCards.count == 0 {
+        var allTableauCardsUp = true
+        for tableau in tableaus {
+          if tableau.pileDown.count > 0 {
+            allTableauCardsUp = false
+            break
+          } // tableau still has down cards
+        } // loop through all tableaus
+        if allTableauCardsUp {
+          hud.showAutoplayButton()
+        }
+      } // waste pile is empty
+    } // check for autowin
   } // evaluateGameWon
+  
+  func autoFinish() {
+    gameState = .Ending
+    var delay = TimeInterval(0)
+    while gameState == .Ending {
+      // 1. Find lowest value card
+      var lowestValueCard: Card?
+      for tableau in tableaus {
+        if let lastTableauCard = tableau.pileUp.last {
+          if lowestValueCard == nil {
+            lowestValueCard = lastTableauCard
+          } else {
+            if lastTableauCard.value < lowestValueCard!.value {
+              lowestValueCard = lastTableauCard
+            } // found lower card
+          } // look for lower card
+        } // get last card on tableau pile
+      } // loop through all tableaus
+      
+      // 2. Move to foundation
+      if let lowestValueCard = lowestValueCard {
+        startMovingCards(startingWithCard: lowestValueCard)
+        if let foundationStackNo = canMove(toStack: .Foundation, checkDistance: false) {
+          cardFoundations[foundationStackNo].add(card: lowestValueCard,
+                                                 withWiggle: false,
+                                                 withAnimSpeed: cardAnimSpeed,
+                                                 delay: delay)
+          delay += cardAnimSpeed * 2
+        } else {
+          fatalError("Trying to autoplay, but lowest card can't be moved to a Foundation")
+        }
+      } else {
+        // no lowest value card found (no tableau cards remain)
+        break
+      } // move cards to foundation until all cards moved
+      
+    } // loop while still ending game (should be until game wins)
+    runAfter(delay: delay) {
+      print("Autoplay winner, winner, chicken dinner!!!")
+      self.animateWinning()
+    }
+  } // autoFinish
   
   func animateWinning() {
     
@@ -374,6 +429,14 @@ extension GameScene {
       restartGame(reshuffle: true)
     } else if let firstNode = nodes(at: pos).first, firstNode.name == "SettingsButton" {
       hud.showSettings()
+      resetTouches()
+      return
+    } else if let firstNode = nodes(at: pos).first, firstNode.name == "AutoplayButton" {
+      resetTouches()
+      autoFinish()
+      return
+    } else if let firstNode = nodes(at: pos).first, firstNode.name == "VolumeMute" {
+      hud.toggleVolumeMute()
       resetTouches()
       return
     } else if hud.buttonPressed(at: pos) {
