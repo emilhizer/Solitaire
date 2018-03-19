@@ -65,8 +65,9 @@ class Card: SKSpriteNode {
   private let frontFaceScale = CGFloat(0.95)
   
   // MARK: - Init
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  required init?(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+    print("Card: init(coder:) has not been implemented")
   }
   
   init(suit: Suit, value: Int, frontImage: String, altFrontImage: String? = nil, backImage: String, frontBackground: String = "CardFrontTexture") {
@@ -79,16 +80,18 @@ class Card: SKSpriteNode {
     self.frontBackground = SKTexture(imageNamed: frontBackground)
     self.suit = suit
     self.value = value
+
     frontTexture = SKTexture(imageNamed: frontImage)
-    if let altFrontImage = altFrontImage {
-      altFrontTexture = SKTexture(imageNamed: altFrontImage)
-    }
     backTexture = SKTexture(imageNamed: backImage)
-    
+
     super.init(texture: self.frontBackground,
                color: .clear,
                size: self.frontBackground.size())
-    
+
+    if let altFrontImage = altFrontImage {
+      altFrontTexture = SKTexture(imageNamed: altFrontImage)
+    }
+
     name = "Card"
     
     frontFaceNode = SKSpriteNode(texture: frontTexture)
@@ -100,6 +103,10 @@ class Card: SKSpriteNode {
     
     
   } // init
+  
+  func setup() {
+    
+  }
   
   
   // MARK: - Functions

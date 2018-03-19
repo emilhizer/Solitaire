@@ -50,8 +50,9 @@ class HUD: SKNode {
   var bigCards = false
   
   // MARK: - Init
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  required init?(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+    print("HUD: init(coder:) has nothing to implement")
   }
   
   init(size hudSize: CGSize, hide: Bool = false) {
@@ -266,6 +267,14 @@ class HUD: SKNode {
     fadeIn.timingMode = .easeIn
     autoplayButton.run(fadeIn)
   } // showAutoPlayButton
+  
+  func hideUndoButton() {
+    let fadeOut = SKAction.fadeOut(withDuration: 0.2)
+    let hideAfter = SKAction.run {
+      self.undoButton.isHidden = true
+    }
+    undoButton.run(SKAction.sequence([fadeOut, hideAfter]))
+  } // hideUndoButton
   
   func buttonPressed(at pos: CGPoint) -> Bool {
     if let firstNode = nodes(at: pos).first, firstNode.name == "SettingsExit" {

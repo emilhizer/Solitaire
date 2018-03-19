@@ -10,7 +10,7 @@ import Foundation
 import SpriteKit
 
 
-class WastePile {
+class WastePile: NSObject, NSCoding {
   
   
   // MARK: - Properties
@@ -35,10 +35,28 @@ class WastePile {
   // Sound effect
   var soundFX: SKAction?
   
+  // MARK: - Save data
+  func encode(with aCoder: NSCoder) {
+    print("encode -- WastePile")
+    aCoder.encode(basePosition, forKey: "WastePile.basePosition")
+    aCoder.encode(baseZPosition, forKey: "WastePile.baseZPosition")
+    aCoder.encode(pile, forKey: "WastePile.pile")
+    aCoder.encode(spacing, forKey: "WastePile.spacing")
+    aCoder.encode(threeUpPositions, forKey: "WastePile.threeUpPositions")
+    aCoder.encode(threeUpCards, forKey: "WastePile.threeUpCards")
+  } // encode
+  
   // MARK: - Init
   required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
+    print("init(coder:) -- WastPile start")
+    basePosition = aDecoder.decodeObject(forKey: "WastePile.basePosition") as! CGPoint
+    baseZPosition = aDecoder.decodeObject(forKey: "WastePile.baseZPosition") as! CGFloat
+    pile = aDecoder.decodeObject(forKey: "WastePile.pile") as! [Card]
+    spacing = aDecoder.decodeObject(forKey: "WastePile.spacing") as! CGFloat
+    threeUpPositions = aDecoder.decodeObject(forKey: "WastePile.threeUpPositions") as! [CGPoint]
+    threeUpCards = aDecoder.decodeObject(forKey: "WastePile.threeUpCards") as! [Card]
+    print("init(coder:) -- WastPile finish")
+  } // init:coder
   
   init(basePosition: CGPoint, cardSpacing spacing: CGFloat) {
     self.basePosition = basePosition

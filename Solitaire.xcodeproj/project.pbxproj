@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F008487205C588F0087BB12 /* GameScene+SaveLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F008486205C588F0087BB12 /* GameScene+SaveLoad.swift */; };
+		0F008489205C59750087BB12 /* GameScene+Observers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F008488205C59750087BB12 /* GameScene+Observers.swift */; };
 		0F425563201573420071BA41 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F425562201573420071BA41 /* AppDelegate.swift */; };
 		0F425565201573420071BA41 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 0F425564201573420071BA41 /* GameScene.sks */; };
 		0F425567201573420071BA41 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 0F425566201573420071BA41 /* Actions.sks */; };
@@ -65,6 +67,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0F008486205C588F0087BB12 /* GameScene+SaveLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+SaveLoad.swift"; sourceTree = "<group>"; };
+		0F008488205C59750087BB12 /* GameScene+Observers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+Observers.swift"; sourceTree = "<group>"; };
 		0F42555F201573420071BA41 /* Solitaire.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Solitaire.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F425562201573420071BA41 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0F425564201573420071BA41 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -163,6 +167,8 @@
 				0F7847F52026DB3A0092143D /* WastePile.swift */,
 				0FE151722016EE2500FC8D2A /* CardDeck.swift */,
 				0F6D0892201D38C6000D56DC /* GameScene+GamePlay.swift */,
+				0F008486205C588F0087BB12 /* GameScene+SaveLoad.swift */,
+				0F008488205C59750087BB12 /* GameScene+Observers.swift */,
 				0FCD8687203FD6CF0011A2FF /* GameScene+SettingsChanged.swift */,
 				0F79882A202F5117002E3BD4 /* GameScene+Undo.swift */,
 				0F6D088C201CD223000D56DC /* GameScene+Touches.swift */,
@@ -361,6 +367,7 @@
 				0FE1518A2016F46D00FC8D2A /* CGFloat+Extensions.swift in Sources */,
 				0F6D088D201CD223000D56DC /* GameScene+Touches.swift in Sources */,
 				0FE151732016EE2500FC8D2A /* CardDeck.swift in Sources */,
+				0F008487205C588F0087BB12 /* GameScene+SaveLoad.swift in Sources */,
 				0FD47FA22041B4D600AE82D7 /* NSObject+Extensions.swift in Sources */,
 				0F6D0891201CE517000D56DC /* CardFoundation.swift in Sources */,
 				0F798829202F42E9002E3BD4 /* UIColor+Pantone.swift in Sources */,
@@ -375,6 +382,7 @@
 				0F798828202F42E9002E3BD4 /* UIColor+AppleColoredPencils.swift in Sources */,
 				0FE1518C2016F46D00FC8D2A /* SKColor+Extensions.swift in Sources */,
 				0F42556B201573420071BA41 /* GameViewController.swift in Sources */,
+				0F008489205C59750087BB12 /* GameScene+Observers.swift in Sources */,
 				0F425563201573420071BA41 /* AppDelegate.swift in Sources */,
 				0F425580201597D40071BA41 /* Card.swift in Sources */,
 				0FE1518D2016F46D00FC8D2A /* SKTEffects.swift in Sources */,

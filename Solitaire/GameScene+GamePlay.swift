@@ -250,7 +250,7 @@ extension GameScene {
       animateWinning()
     } else {
       // Check to see if we can autowin
-      if currentDeck.unusedCards.count == 0 {
+      if (currentDeck.unusedCards.count == 0) && (wastePile.count <= 1) {
         var allTableauCardsUp = true
         for tableau in tableaus {
           if tableau.pileDown.count > 0 {
@@ -260,6 +260,8 @@ extension GameScene {
         } // loop through all tableaus
         if allTableauCardsUp {
           hud.showAutoplayButton()
+          hud.hideUndoButton()
+          canAutoWin = true
         }
       } // waste pile is empty
     } // check for autowin
@@ -323,10 +325,14 @@ extension GameScene {
         let flipCardFace = SKAction.run {
           card.flipOver()
         }
+        let setZpos = SKAction.run {
+          card.zPosition += 1000
+        }
         let flipCard_1 = SKAction.scaleX(to: -1, duration: cardFlight / 4)
         let flipCard1 = SKAction.scaleX(to: 1, duration: cardFlight / 4)
         let flipCard = SKAction.sequence([flipCard0,
                                           flipCardFace,
+                                          setZpos,
                                           flipCard_1,
                                           flipCard0,
                                           flipCardFace,

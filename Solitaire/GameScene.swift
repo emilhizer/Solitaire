@@ -12,14 +12,16 @@ import GameplayKit
 class GameScene: SKScene {
   
   // Game Data
+  // -- Always loaded from plist
   var gameInitData = [String: Any]()
   var cardDecks = [String: CardDeck]()
-  var originalDeck: CardDeck!
+  // -- Reloaded on restore from save
   var currentDeck: CardDeck!
+  var originalDeck: CardDeck?
   var tableaus = [Tableau]()
   var cardFoundations = [CardFoundation]()
   var wastePile: WastePile!
-  
+
   // Player Moves
   enum PlayerAction: Int {
     case MoveCard = 0
@@ -58,7 +60,6 @@ class GameScene: SKScene {
   var playerMoves = [PlayerMove]()
   
   // Game Setup
-  var replayDeck: CardDeck?
   var feltImage = "Feltr2"
   var cardBackImage = "CardBackNU"
   var useBigCards = false
@@ -126,6 +127,7 @@ class GameScene: SKScene {
     }
   } // CardsInMotion
   var cardsInMotion = CardsInMotion()
+  var canAutoWin = false
   
   // User Default Keys
   enum UDKeys {
@@ -137,6 +139,20 @@ class GameScene: SKScene {
 
   
   // MARK: - Init and Setup
+  
+  // Init
+  required init?(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+    print("init:coder")
+  } // init:coder
+  
+  override init(size: CGSize) {
+    super.init(size: size)
+    print("init:size")
+    addObservers()
+  }
+  
+  // Setup scene
   override func didMove(to view: SKView) {
     
     print("Init: Load game data")
@@ -157,22 +173,24 @@ class GameScene: SKScene {
     print("Init: Setup dealer")
     setupDealer()
     
-    parseCardsData(fromPList: gameInitData)
-    if replayDeck == nil {
-      print("Init: Replay deck is nil")
-      currentDeck = cardDecks["52PlayingCardDeck"]
-      currentDeck.shuffleDeck()
-    } else {
-      print("Init: Using previous replay deck")
-      currentDeck = replayDeck!
-    }
-    originalDeck = currentDeck.copy()
+    if gameState == .Starting {
+      parseCardsData(fromPList: gameInitData)
+      if let replayDeck = originalDeck {
+        print("Init: Using previous replay deck")
+        currentDeck = replayDeck
+      } else {
+        print("Init: Replay deck is nil")
+        currentDeck = cardDecks["52PlayingCardDeck"]
+        currentDeck.shuffleDeck()
+        originalDeck = currentDeck.copy()
+      }
 
-    print("Init: Setup Cards")
-    setupCards()
-    
-    print("Init: Start new game")
-    startNewGame()
+      print("Init: Setup Cards")
+      setupCards()
+      
+      print("Init: Start new game")
+      startNewGame()
+    }
     
   } // didMove:to view
   
@@ -411,7 +429,7 @@ class GameScene: SKScene {
     let gameScene = GameScene(size: size)
     
     if !reshuffle {
-      gameScene.replayDeck = originalDeck
+      gameScene.originalDeck = originalDeck
     }
     
     gameScene.anchorPoint = CGPoint(x: 0.5, y: 0.5)

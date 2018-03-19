@@ -9,9 +9,9 @@
 import Foundation
 import SpriteKit
 
-class CardDeck {
+class CardDeck: NSObject, NSCoding {
   
-  var unusedCards: [Card]
+  var unusedCards = [Card]()
   var usedCards = [Card]()
   var deckName: String
   var cardWidth: CGFloat? {
@@ -36,12 +36,27 @@ class CardDeck {
     return unusedCards.count + usedCards.count
   }
   
+  // MARK: - Save (encode) data
+  func encode(with aCoder: NSCoder) {
+    print("encode -- CardDeck")
+    aCoder.encode(unusedCards, forKey: "CardDeck.unusedCards")
+    aCoder.encode(unusedCards, forKey: "CardDeck.usedCards")
+    aCoder.encode(deckName, forKey: "CardDeck.deckName")
+  }
+  
   // MARK: - Init
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
+  // Use "convenience" so we can call self.init after we decode setup data
+  required convenience init?(coder aDecoder: NSCoder) {
+    print("init(coder:) -- CardDeck start")
+    let deckName = aDecoder.decodeObject(forKey: "CardDeck.deckName") as! String
+    self.init(deckName: deckName)
+    unusedCards = aDecoder.decodeObject(forKey: "CardDeck.unusedCards") as! [Card]
+    usedCards = aDecoder.decodeObject(forKey: "CardDeck.usedCards") as! [Card]
+    print("init(coder:) -- CardDeck finish")
   }
 
   init(deckName: String, initialCards: [Card]? = nil) {
+    print("Init: CardDeck")
     if let initialCards = initialCards {
       unusedCards = initialCards
     } else {
