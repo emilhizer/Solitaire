@@ -9,7 +9,7 @@
 import Foundation
 import SpriteKit
 
-class CardDeck: NSObject, NSCoding {
+class CardDeck: Codable {
   
   var unusedCards = [Card]()
   var usedCards = [Card]()
@@ -36,25 +36,8 @@ class CardDeck: NSObject, NSCoding {
     return unusedCards.count + usedCards.count
   }
   
-  // MARK: - Save (encode) data
-  func encode(with aCoder: NSCoder) {
-    print("encode -- CardDeck")
-    aCoder.encode(unusedCards, forKey: "CardDeck.unusedCards")
-    aCoder.encode(unusedCards, forKey: "CardDeck.usedCards")
-    aCoder.encode(deckName, forKey: "CardDeck.deckName")
-  }
   
   // MARK: - Init
-  // Use "convenience" so we can call self.init after we decode setup data
-  required convenience init?(coder aDecoder: NSCoder) {
-    print("init(coder:) -- CardDeck start")
-    let deckName = aDecoder.decodeObject(forKey: "CardDeck.deckName") as! String
-    self.init(deckName: deckName)
-    unusedCards = aDecoder.decodeObject(forKey: "CardDeck.unusedCards") as! [Card]
-    usedCards = aDecoder.decodeObject(forKey: "CardDeck.usedCards") as! [Card]
-    print("init(coder:) -- CardDeck finish")
-  }
-
   init(deckName: String, initialCards: [Card]? = nil) {
     print("Init: CardDeck")
     if let initialCards = initialCards {

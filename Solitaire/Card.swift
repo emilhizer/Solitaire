@@ -9,31 +9,31 @@
 import Foundation
 import SpriteKit
 
-enum CardFacing: Int {
+enum CardFacing: Int, Codable {
   case Front = 0
   case Back
 }
 
-enum Suit: Int {
+enum Suit: Int, Codable {
   case Spades = 0
   case Diamonds
   case Clubs
   case Hearts
 }
 
-enum SuitColor: Int {
+enum SuitColor: Int, Codable {
   case Black = 0
   case Red
 }
 
-enum StackType: Int {
+enum StackType: Int, Codable {
   case Stock
   case Waste
   case Tableau
   case Foundation
 }
 
-class Card: SKSpriteNode {
+class Card: SKSpriteNode, Codable {
   
   // MARK: - Properties
   var suit: Suit
@@ -65,11 +65,6 @@ class Card: SKSpriteNode {
   private let frontFaceScale = CGFloat(0.95)
   
   // MARK: - Init
-  required init?(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
-    print("Card: init(coder:) has not been implemented")
-  }
-  
   init(suit: Suit, value: Int, frontImage: String, altFrontImage: String? = nil, backImage: String, frontBackground: String = "CardFrontTexture") {
 
     self.frontImageName = frontImage
@@ -104,9 +99,6 @@ class Card: SKSpriteNode {
     
   } // init
   
-  func setup() {
-    
-  }
   
   
   // MARK: - Functions
