@@ -10,8 +10,14 @@ import Foundation
 import SpriteKit
 
 
-class CardFoundation {
+class CardFoundation: NSObject, NSCoding {
   
+  // En/Decoding Keys
+  enum Keys {
+    static var basePosition = "CardFoundation.basePosition"
+    static var pile = "CardFoundation.pile"
+    static var soundFX = "CardFoundation.soundFX"
+  } // Keys
   
   // MARK: - Properties
   var basePosition = CGPoint.zero
@@ -19,11 +25,28 @@ class CardFoundation {
   
   var soundFX: SKAction?
   
-  // MARK: - Init
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
+  // MARK: - Save data
+  func encode(with aCoder: NSCoder) {
+    print("encode -- CardFoundation")
+    aCoder.encode(basePosition, forKey: Keys.basePosition)
+    aCoder.encode(pile, forKey: Keys.pile)
+    // Note soundFX is a run-block and may not be encodable
+    //   may need to reapply soundFX at GameScene level back into this object
+    //   when restoring from save (decoding)
+//    if let optionalSoundFX = soundFX {
+//      aCoder.encode(optionalSoundFX, forKey: Keys.soundFX)
+//    }
+    // Not encoding/decoding animations - let's see what happens...
+  } // encode
   
+  // MARK: - Init
+  required init?(coder aDecoder: NSCoder) {
+    print("init(coder:) -- CardFoundation")
+    basePosition = aDecoder.decodeCGPoint(forKey: Keys.basePosition)
+    pile = aDecoder.decodeObject(forKey: Keys.pile) as! [Card]
+//    soundFX = aDecoder.decodeObject(forKey: Keys.soundFX) as? SKAction
+  } // init:coder
+
   init(basePosition: CGPoint) {
     self.basePosition = basePosition
   }

@@ -34,10 +34,13 @@ extension GameScene {
   
   // Class function to retrieve this class and applicable structures
   class func loadGame() -> GameScene? {
+    print("-- Trying to load game from saved data")
     var loadedGameScene: GameScene?
     
     if let retrieveURL = GameScene.savedGameURL() {
+      print("  -- Found saved game URL: \(retrieveURL)")
       if FileManager.default.fileExists(atPath: retrieveURL.path) {
+        print("    -- Unarchiving...")
         loadedGameScene = NSKeyedUnarchiver.unarchiveObject(withFile: retrieveURL.path) as? GameScene
         GameScene.removeSavedGame()
         print("Sucessfully Retrieved data from: \(retrieveURL.path)")
@@ -64,11 +67,6 @@ extension GameScene {
     }
   } // saveGame
 
-  // Encode the GameScene data
-  override func encode(with aCoder: NSCoder) {
-    aCoder.encode(gameState.rawValue, forKey: "GS.gameState")
-    super.encode(with: aCoder)
-  } // encode
   
   
   

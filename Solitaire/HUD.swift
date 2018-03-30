@@ -26,8 +26,33 @@ class HUD: SKNode {
   // MARK: - Protocol Delegates
   weak var settingsChangedDelegate: SettingsChangedDelegate?
 
+  // En/Decoding Keys
+  enum Keys {
+    static var settingsChangedDelegate = "HUD.settingsChangedDelegate"
+    static var hudSize = "HUD.hudSize"
+    static var volumeMute = "HUD.volumeMute"
+    static var bigCards = "HUD.bigCards"
+    static var undoButton = "HUD.undoButton"
+    static var newGameButton = "HUD.newGameButton"
+    //  static var pauseButton = "HUD.pauseButton"
+    static var replayButton = "HUD.replayButton"
+    static var autoplayButton = "HUD.autoplayButton"
+    static var autoplayShine = "HUD.autoplayShine"
+    static var settingsButton = "HUD.settingsButton"
+    static var volumeMuteButton = "HUD.volumeMuteButton"
+    static var settingsMenu = "HUD.settingsMenu"
+    static var settingsExit = "HUD.settingsExit"
+    static var bgVolumeSlider = "HUD.bgVolumeSlider"
+    static var bgVolumeSliderMask = "HUD.bgVolumeSliderMask"
+    static var bgCropNode = "HUD.bgCropNode"
+    static var fxVolumeSlider = "HUD.fxVolumeSlider"
+    static var fxVolumeSliderMask = "HUD.fxVolumeSliderMask"
+    static var fxCropNode = "HUD.fxCropNode"
+    static var bigCardsButton = "HUD.bigCardsButton"
+  } // Keys
+  
   // MARK: - Properties
-  var hudSize: CGSize!
+  var hudSize = CGSize.zero
   var undoButton: SKSpriteNode!
   var newGameButton: SKSpriteNode!
 //  var pauseButton: SKSpriteNode!
@@ -49,17 +74,74 @@ class HUD: SKNode {
   var bigCardsButton: SKSpriteNode!
   var bigCards = false
   
+  // MARK: - Save data
+  override func encode(with aCoder: NSCoder) {
+    print("encode -- HUD")
+    aCoder.encode(settingsChangedDelegate, forKey: Keys.settingsChangedDelegate)
+    aCoder.encode(hudSize, forKey: Keys.hudSize)
+    aCoder.encode(volumeMute, forKey: Keys.volumeMute)
+    aCoder.encode(bigCards, forKey: Keys.bigCards)
+    
+    aCoder.encode(newGameButton, forKey: Keys.newGameButton)
+    //  aCoder.encode(pauseButton, forKey: Keys.pauseButton)
+    aCoder.encode(replayButton, forKey: Keys.replayButton)
+    aCoder.encode(autoplayButton, forKey: Keys.autoplayButton)
+    aCoder.encode(autoplayShine, forKey: Keys.autoplayShine)
+    aCoder.encode(settingsButton, forKey: Keys.settingsButton)
+    aCoder.encode(volumeMuteButton, forKey: Keys.volumeMuteButton)
+    aCoder.encode(settingsMenu, forKey: Keys.settingsMenu)
+    aCoder.encode(settingsExit, forKey: Keys.settingsExit)
+    aCoder.encode(bgVolumeSlider, forKey: Keys.bgVolumeSlider)
+    aCoder.encode(bgVolumeSliderMask, forKey: Keys.bgVolumeSliderMask)
+    aCoder.encode(bgCropNode, forKey: Keys.bgCropNode)
+    aCoder.encode(fxVolumeSlider, forKey: Keys.fxVolumeSlider)
+    aCoder.encode(fxVolumeSliderMask, forKey: Keys.fxVolumeSliderMask)
+    aCoder.encode(fxCropNode, forKey: Keys.fxCropNode)
+    aCoder.encode(bigCardsButton, forKey: Keys.bigCardsButton)
+
+    super.encode(with: aCoder)
+  } // encode
+  
   // MARK: - Init
   required init?(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
-    print("HUD: init(coder:) has nothing to implement")
-  }
-  
-  init(size hudSize: CGSize, hide: Bool = false) {
+    print("init(coder:) -- HUD")
+    settingsChangedDelegate =
+      aDecoder.decodeObject(forKey: Keys.settingsChangedDelegate) as? SettingsChangedDelegate
+    hudSize = aDecoder.decodeCGSize(forKey: Keys.hudSize)
+    volumeMute = aDecoder.decodeBool(forKey: Keys.volumeMute)
+    bigCards = aDecoder.decodeBool(forKey: Keys.bigCards)
     
+    newGameButton = aDecoder.decodeObject(forKey: Keys.newGameButton) as! SKSpriteNode
+    //  pauseButton = aDecoder.decodeObject(forKey: Keys.pauseButton) as! SKSpriteNode
+    replayButton = aDecoder.decodeObject(forKey: Keys.replayButton) as! SKSpriteNode
+    autoplayButton = aDecoder.decodeObject(forKey: Keys.autoplayButton) as! SKSpriteNode
+    autoplayShine = aDecoder.decodeObject(forKey: Keys.autoplayShine) as! SKSpriteNode
+    settingsButton = aDecoder.decodeObject(forKey: Keys.settingsButton) as! SKSpriteNode
+    volumeMuteButton = aDecoder.decodeObject(forKey: Keys.volumeMuteButton) as! SKSpriteNode
+    settingsMenu = aDecoder.decodeObject(forKey: Keys.settingsMenu) as! SKNode
+    settingsExit = aDecoder.decodeObject(forKey: Keys.settingsExit) as! SKSpriteNode
+    bgVolumeSlider = aDecoder.decodeObject(forKey: Keys.bgVolumeSlider) as! SKSpriteNode
+    bgVolumeSliderMask = aDecoder.decodeObject(forKey: Keys.bgVolumeSliderMask) as! SKSpriteNode
+    bgCropNode = aDecoder.decodeObject(forKey: Keys.bgCropNode) as! SKCropNode
+    fxVolumeSlider = aDecoder.decodeObject(forKey: Keys.fxVolumeSlider) as! SKSpriteNode
+    fxVolumeSliderMask = aDecoder.decodeObject(forKey: Keys.fxVolumeSliderMask) as! SKSpriteNode
+    fxCropNode = aDecoder.decodeObject(forKey: Keys.fxCropNode) as! SKCropNode
+    bigCardsButton = aDecoder.decodeObject(forKey: Keys.bigCardsButton) as! SKSpriteNode
+
+    super.init(coder: aDecoder)
+//    setupHUD()
+  } // init:coder
+
+  init(size hudSize: CGSize, hide: Bool = false) {
     super.init()
 
     self.hudSize = hudSize
+    isHidden = hide
+    
+    setupHUD()
+  } // init:size
+
+  func setupHUD() {
     let buttonSize = CGSize(width: hudSize.width / 15,
                             height: hudSize.width / 15)
     let buttonSpacing = hudSize.width / 15
@@ -76,17 +158,16 @@ class HUD: SKNode {
     }
     
     var buttonPosition = topRowRightPos
-
-    isHidden = hide
+    
     zPosition = 2000
-
+    
     undoButton = SKSpriteNode(imageNamed: "UndoArrow")
     undoButton.name = "UndoButton"
     undoButton.size = buttonSize
     undoButton.position = buttonPosition
     undoButton.zPosition = zPosition + 1
     addChild(undoButton)
-
+    
     buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
     replayButton = SKSpriteNode(imageNamed: "RefreshPageArrow")
     replayButton.name = "ReplayGameButton"
@@ -94,7 +175,7 @@ class HUD: SKNode {
     replayButton.position = buttonPosition
     replayButton.zPosition = zPosition + 1
     addChild(replayButton)
-
+    
     buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
     newGameButton = SKSpriteNode(imageNamed: "PlusButton")
     newGameButton.name = "NewGameButton"
@@ -102,14 +183,14 @@ class HUD: SKNode {
     newGameButton.position = buttonPosition
     newGameButton.zPosition = zPosition + 1
     addChild(newGameButton)
-
-//    buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
-//    pauseButton = SKSpriteNode(imageNamed: "PauseButton")
-//    pauseButton.name = "PauseButton"
-//    pauseButton.size = buttonSize
-//    pauseButton.position = buttonPosition
-//    pauseButton.zPosition = zPosition + 1
-//    addChild(pauseButton)
+    
+    //    buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
+    //    pauseButton = SKSpriteNode(imageNamed: "PauseButton")
+    //    pauseButton.name = "PauseButton"
+    //    pauseButton.size = buttonSize
+    //    pauseButton.position = buttonPosition
+    //    pauseButton.zPosition = zPosition + 1
+    //    addChild(pauseButton)
     
     buttonPosition -= CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
     autoplayButton = SKSpriteNode(imageNamed: "play")
@@ -143,16 +224,16 @@ class HUD: SKNode {
     let sequence = SKAction.sequence([group1, group2, hide, wait, show])
     let foreverAction = SKAction.repeatForever(sequence)
     autoplayShine.run(foreverAction)
-
+    
     buttonPosition = topRowLeftPos
-//    settingsButton = SKSpriteNode(imageNamed: "SettingsButton")
+    //    settingsButton = SKSpriteNode(imageNamed: "SettingsButton")
     settingsButton = SKSpriteNode(imageNamed: "settings")
     settingsButton.name = "SettingsButton"
     settingsButton.size = buttonSize
     settingsButton.position = buttonPosition
     settingsButton.zPosition = zPosition + 1
     addChild(settingsButton)
-
+    
     buttonPosition += CGPoint(x: buttonSpacing + buttonSize.width, y: 0)
     volumeMuteButton = SKSpriteNode(imageNamed: "volume_on")
     volumeMuteButton.name = "VolumeMute"
@@ -160,13 +241,13 @@ class HUD: SKNode {
     volumeMuteButton.position = buttonPosition
     volumeMuteButton.zPosition = zPosition + 1
     addChild(volumeMuteButton)
-
+    
     
     settingsMenu.name = "SettingsMenu"
     settingsMenu.isHidden = true
     settingsMenu.zPosition = zPosition + 100
     addChild(settingsMenu)
-
+    
     let hudOrigin = CGPoint(x: -hudSize.width / 2,
                             y: -hudSize.height / 2)
     let grayOut = SKShapeNode(rect: CGRect(origin: hudOrigin,
@@ -176,7 +257,7 @@ class HUD: SKNode {
     grayOut.name = "SettingsExit"
     grayOut.zPosition = 1
     settingsMenu.addChild(grayOut)
-
+    
     let settingsMenuBG = SKSpriteNode(imageNamed: "PopupBg")
     settingsMenuBG.position = CGPoint.zero
     settingsMenuBG.zPosition = 2
@@ -197,17 +278,17 @@ class HUD: SKNode {
     volumeLabel.position = CGPoint(x: -96, y: 52)
     volumeLabel.zPosition = 10
     settingsMenu.addChild(volumeLabel)
-
+    
     let soundFXLabel = SKSpriteNode(imageNamed: "SoundFXLabel")
     soundFXLabel.position = CGPoint(x: -105, y: -8)
     soundFXLabel.zPosition = 10
     settingsMenu.addChild(soundFXLabel)
-
+    
     let bigCardsLabel = SKSpriteNode(imageNamed: "BigCardsLabel")
     bigCardsLabel.position = CGPoint(x: -102, y: -68)
     bigCardsLabel.zPosition = 10
     settingsMenu.addChild(bigCardsLabel)
-
+    
     bgVolumeSlider = SKSpriteNode(imageNamed: "SliderOn")
     bgVolumeSlider.name = "VolumeSlider"
     bgVolumeSlider.anchorPoint = CGPoint(x: 0, y: 0.5)
@@ -215,7 +296,7 @@ class HUD: SKNode {
     bgVolumeSliderMask.name = "BGSliderMask"
     bgVolumeSliderMask.anchorPoint = CGPoint(x: 0, y: 0.5)
     bgVolumeSliderMask.xScale = 7 / 16
-
+    
     bgCropNode = SKCropNode()
     bgCropNode.name = "BGCropNode"
     bgCropNode.addChild(bgVolumeSlider)
@@ -229,7 +310,7 @@ class HUD: SKNode {
     bgVolumeSliderOff.position = CGPoint(x: -34, y: 57)
     bgVolumeSliderOff.zPosition = 8
     settingsMenu.addChild(bgVolumeSliderOff)
-
+    
     fxVolumeSlider = SKSpriteNode(imageNamed: "SliderOn")
     fxVolumeSlider.name = "FXSlider"
     fxVolumeSlider.anchorPoint = CGPoint(x: 0, y: 0.5)
@@ -244,21 +325,20 @@ class HUD: SKNode {
     fxCropNode.position = CGPoint(x: -34, y: -3)
     fxCropNode.zPosition = 10
     settingsMenu.addChild(fxCropNode)
-
+    
     let fxVolumeSliderOff = SKSpriteNode(imageNamed: "SliderOff")
     fxVolumeSliderOff.name = "FXSliderOff"
     fxVolumeSliderOff.anchorPoint = CGPoint(x: 0, y: 0.5)
     fxVolumeSliderOff.position = CGPoint(x: -34, y: -3)
     fxVolumeSliderOff.zPosition = 8
     settingsMenu.addChild(fxVolumeSliderOff)
-
+    
     bigCardsButton = SKSpriteNode(imageNamed: "SwitchOff")
     bigCardsButton.name = "BigCardsSwitch"
     bigCardsButton.position = CGPoint(x: 128, y: -61)
     bigCardsButton.zPosition = 6
     settingsMenu.addChild(bigCardsButton)
-
-  } // init:size
+  } // setupHUD()
   
   func showAutoplayButton() {
     autoplayButton.alpha = 0

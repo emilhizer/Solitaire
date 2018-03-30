@@ -9,6 +9,7 @@
 import Foundation
 import SpriteKit
 
+// MARK: - Global Enums
 enum CardFacing: Int {
   case Front = 0
   case Back
@@ -33,7 +34,29 @@ enum StackType: Int {
   case Foundation
 }
 
+
+// MARK: - Main Class
 class Card: SKSpriteNode {
+  
+  // En/Decoding Keys
+  enum Keys {
+    static var suit = "Card.suit"
+    static var value = "Card.value"
+    static var facing = "Card.facing"
+    static var onStack = "Card.onStack"
+    static var stackNumber = "Card.stackNumber"
+    static var isTopOfWaste = "Card.isTopOfWaste"
+    static var frontImageName = "Card.frontImageName"
+    static var altFrontImageName = "Card.altFrontImageName"
+    static var backImageName = "Card.backImageName"
+    static var frontBackgroundName = "Card.frontBackgroundName"
+    static var frontBackground = "Card.frontBackground"
+    static var frontTexture = "Card.frontTexture"
+    static var altFrontTexture = "Card.altFrontTexture"
+    static var backTexture = "Card.backTexture"
+    static var frontFaceNode = "Card.frontFaceNode"
+    static let frontFaceScale = "Card.frontFaceScale"
+  } // Keys
   
   // MARK: - Properties
   var suit: Suit
@@ -62,14 +85,65 @@ class Card: SKSpriteNode {
   private var backTexture: SKTexture
   
   private var frontFaceNode: SKSpriteNode!
-  private let frontFaceScale = CGFloat(0.95)
+  private var frontFaceScale = CGFloat(0.95)
+  
+  // MARK: - Save data
+  override func encode(with aCoder: NSCoder) {
+    print("encode -- Card")
+    aCoder.encode(suit.rawValue, forKey: Keys.suit)
+    aCoder.encode(value, forKey: Keys.value)
+    aCoder.encode(facing.rawValue, forKey: Keys.facing)
+    if onStack != nil {
+      aCoder.encode(onStack!.rawValue, forKey: Keys.onStack)
+    }
+    if stackNumber != nil {
+      aCoder.encode(stackNumber!, forKey: Keys.stackNumber)
+    }
+    aCoder.encode(isTopOfWaste, forKey: Keys.isTopOfWaste)
+    aCoder.encode(frontImageName, forKey: Keys.frontImageName)
+    if altFrontImageName != nil {
+      aCoder.encode(altFrontImageName!, forKey: Keys.altFrontImageName)
+    }
+    aCoder.encode(backImageName, forKey: Keys.backImageName)
+    aCoder.encode(frontBackgroundName, forKey: Keys.frontBackgroundName)
+    aCoder.encode(frontBackground, forKey: Keys.frontBackground)
+    aCoder.encode(frontTexture, forKey: Keys.frontTexture)
+    if altFrontTexture != nil {
+      aCoder.encode(altFrontTexture!, forKey: Keys.altFrontTexture)
+    }
+    aCoder.encode(backTexture, forKey: Keys.backTexture)
+    aCoder.encode(frontFaceNode, forKey: Keys.frontFaceNode)
+    aCoder.encode(frontFaceScale, forKey: Keys.frontFaceScale)
+    
+    super.encode(with: aCoder)
+  } // encode
   
   // MARK: - Init
   required init?(coder aDecoder: NSCoder) {
+    print("init(coder:) -- Card")
+    suit = Suit(rawValue: aDecoder.decodeInteger(forKey: Keys.suit))!
+    value = aDecoder.decodeInteger(forKey: Keys.value)
+    facing = CardFacing(rawValue: aDecoder.decodeInteger(forKey: Keys.facing))!
+    if aDecoder.containsValue(forKey: Keys.onStack) {
+      onStack = StackType(rawValue: aDecoder.decodeInteger(forKey: Keys.onStack))
+    }
+    if aDecoder.containsValue(forKey: Keys.stackNumber) {
+      stackNumber = aDecoder.decodeInteger(forKey: Keys.stackNumber)
+    }
+    isTopOfWaste = aDecoder.decodeBool(forKey: Keys.isTopOfWaste)
+    frontImageName = aDecoder.decodeObject(forKey: Keys.frontImageName) as! String
+    altFrontImageName = aDecoder.decodeObject(forKey: Keys.altFrontImageName) as? String
+    backImageName = aDecoder.decodeObject(forKey: Keys.backImageName) as! String
+    frontBackgroundName = aDecoder.decodeObject(forKey: Keys.frontBackgroundName) as! String
+    frontBackground = aDecoder.decodeObject(forKey: Keys.frontBackground) as! SKTexture
+    frontTexture = aDecoder.decodeObject(forKey: Keys.frontTexture) as! SKTexture
+    altFrontTexture = aDecoder.decodeObject(forKey: Keys.altFrontTexture) as? SKTexture
+    backTexture = aDecoder.decodeObject(forKey: Keys.backTexture) as! SKTexture
+    frontFaceNode = aDecoder.decodeObject(forKey: Keys.frontFaceNode) as! SKSpriteNode
+    frontFaceScale = aDecoder.decodeObject(forKey: Keys.frontFaceScale) as! CGFloat
     super.init(coder: aDecoder)
-    print("Card: init(coder:) has not been implemented")
-  }
-  
+  } // init:coder
+
   init(suit: Suit, value: Int, frontImage: String, altFrontImage: String? = nil, backImage: String, frontBackground: String = "CardFrontTexture") {
 
     self.frontImageName = frontImage
@@ -101,13 +175,7 @@ class Card: SKSpriteNode {
     frontFaceNode.zPosition = 1
     addChild(frontFaceNode)
     
-    
   } // init
-  
-  func setup() {
-    
-  }
-  
   
   // MARK: - Functions
   func setSize(to newSize: CGSize) {
@@ -160,9 +228,7 @@ class Card: SKSpriteNode {
   } // faceUp
   
   func useAltImage() {
-    print("-- Use Alt Card Image")
     if let altFontTexture = altFrontTexture {
-      print("-- -- Alt Card Texture Found")
       frontFaceNode.texture! = altFontTexture
     }
   } // useAltImage

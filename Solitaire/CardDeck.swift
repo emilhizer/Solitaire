@@ -11,6 +11,13 @@ import SpriteKit
 
 class CardDeck: NSObject, NSCoding {
   
+  // En/Decoding Keys
+  enum Keys {
+    static var unusedCards = "CardDeck.unusedCards"
+    static var usedCards = "CardDeck.usedCards"
+    static var deckName = "CardDeck.deckName"
+  } // Keys
+  
   var unusedCards = [Card]()
   var usedCards = [Card]()
   var deckName: String
@@ -39,20 +46,19 @@ class CardDeck: NSObject, NSCoding {
   // MARK: - Save (encode) data
   func encode(with aCoder: NSCoder) {
     print("encode -- CardDeck")
-    aCoder.encode(unusedCards, forKey: "CardDeck.unusedCards")
-    aCoder.encode(unusedCards, forKey: "CardDeck.usedCards")
-    aCoder.encode(deckName, forKey: "CardDeck.deckName")
+    aCoder.encode(unusedCards, forKey: Keys.unusedCards)
+    aCoder.encode(usedCards, forKey: Keys.usedCards)
+    aCoder.encode(deckName, forKey: Keys.deckName)
   }
   
   // MARK: - Init
-  // Use "convenience" so we can call self.init after we decode setup data
-  required convenience init?(coder aDecoder: NSCoder) {
-    print("init(coder:) -- CardDeck start")
-    let deckName = aDecoder.decodeObject(forKey: "CardDeck.deckName") as! String
-    self.init(deckName: deckName)
-    unusedCards = aDecoder.decodeObject(forKey: "CardDeck.unusedCards") as! [Card]
-    usedCards = aDecoder.decodeObject(forKey: "CardDeck.usedCards") as! [Card]
-    print("init(coder:) -- CardDeck finish")
+  // Note can use "convenience" if we need to call self.init after we decode some setup data
+  //  required convenience init?(coder aDecoder: NSCoder) {
+  required init?(coder aDecoder: NSCoder) {
+    print("init(coder:) -- CardDeck")
+    deckName = aDecoder.decodeObject(forKey: Keys.deckName) as! String
+    unusedCards = aDecoder.decodeObject(forKey: Keys.unusedCards) as! [Card]
+    usedCards = aDecoder.decodeObject(forKey: Keys.usedCards) as! [Card]
   }
 
   init(deckName: String, initialCards: [Card]? = nil) {

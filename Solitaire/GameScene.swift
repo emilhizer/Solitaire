@@ -11,7 +11,64 @@ import GameplayKit
 
 class GameScene: SKScene {
   
+  // En/Decoding Keys
+  enum Keys {
+    static var currentDeck = "GS.currentDeck"
+    static var originalDeck = "GS.originalDeck"
+    static var tableaus = "GS.tableaus"
+    static var cardFoundations = "GS.cardFoundations"
+    static var wastePile = "GS.wastePile"
+    static var feltImage = "GS.feltImage"
+    static var cardBackImage = "GS.cardBackImage"
+    static var useBigCards = "GS.useBigCards"
+    static var altFaceSuffix = "GS.altFaceSuffix"
+    static var cardPadPercent = "GS.cardPadPercent"
+    static var cardHSpacing = "GS.cardHSpacing"
+    static var cardVSpacing = "GS.cardVSpacing"
+    static var cardScale = "GS.cardScale"
+    static var cardSize = "GS.cardSize"
+    static var cardsAcross = "GS.cardsAcross"
+    static var dealerPosition = "GS.dealerPosition"
+    static var stockLocation = "GS.stockLocation"
+    static var stockCardBase = "GS.stockCardBase"
+    static var wasteLocation = "GS.wasteLocation"
+    static var wasteHorizSpacing = "GS.wasteHorizSpacing"
+    static var cardAnimSpeed = "GS.cardAnimSpeed"
+    static var doCardFlipAnim = "GS.doCardFlipAnim"
+    static var restartStockPile = "GS.restartStockPile"
+    static var youWinLabel = "GS.youWinLabel"
+    static var hud = "GS.hud"
+    static var settingsVolumeTouched = "GS.settingsVolumeTouched"
+    static var settingsFXTouched = "GS.settingsFXTouched"
+    static var gameState = "GS.gameState"
+    static var priorGameState = "GS.priorGameState"
+    static var canAutoWin = "GS.canAutoWin"
+    static var firstTouchPos = "GS.firstTouchPos"
+    static var lastTouchPos = "GS.lastTouchPos"
+    static var touchStarted = "GS.touchStarted"
+    static var cardTouched = "GS.cardTouched"
+    
+    // Structure: cardsInMotion
+    static var CIMcards = "GS.CIM.cards"
+    static var CIMfromStack = "GS.CIM.fromStack"
+    static var CIMfromStackNo = "GS.CIM.fromStackNo"
+
+    // Structure: playerMoves
+    static var PMplayerMoves = "GS.PM.playerMoves"
+    static var PMplayerAction = "GS.PM.playerAction"
+    static var PMcards = "GS.PM.cards"
+    static var PMfromStack = "GS.PM.fromStack"
+    static var PMfromStackNo = "GS.PM.fromStackNo"
+    static var PMtoStack = "GS.PM.toStack"
+    static var PMtoStackNo = "GS.PM.toStackNo"
+  } // Keys
+  
+  // MARK: - Properties
+  
   // Game Data
+  // -- Set by parent
+  var loadFromSave = false
+  
   // -- Always loaded from plist
   var gameInitData = [String: Any]()
   var cardDecks = [String: CardDeck]()
@@ -22,7 +79,7 @@ class GameScene: SKScene {
   var cardFoundations = [CardFoundation]()
   var wastePile: WastePile!
 
-  // Player Moves
+  // Player Moves History
   enum PlayerAction: Int {
     case MoveCard = 0
     case TapStock
@@ -61,7 +118,8 @@ class GameScene: SKScene {
   
   // Game Setup
   var feltImage = "Feltr2"
-  var cardBackImage = "CardBackNU"
+//  var cardBackImage = "CardBackNU"
+  var cardBackImage = "CardBackBasic"
   var useBigCards = false
   var altFaceSuffix: String?
   var cardPadPercent = CGFloat(0.1)
@@ -137,45 +195,223 @@ class GameScene: SKScene {
     static var BigCards = "BigCards"
   }
 
+  // MARK: - Save data
+  override func encode(with aCoder: NSCoder) {
+    print("encode -- GameScene")
+    aCoder.encode(currentDeck, forKey: Keys.currentDeck)
+    if originalDeck != nil {
+      aCoder.encode(originalDeck, forKey: Keys.originalDeck)
+    }
+    aCoder.encode(tableaus, forKey: Keys.tableaus)
+    aCoder.encode(cardFoundations, forKey: Keys.cardFoundations)
+    aCoder.encode(wastePile, forKey: Keys.wastePile)
+    aCoder.encode(feltImage, forKey: Keys.feltImage)
+    aCoder.encode(cardBackImage, forKey: Keys.cardBackImage)
+    aCoder.encode(useBigCards, forKey: Keys.useBigCards)
+    if altFaceSuffix != nil {
+      aCoder.encode(altFaceSuffix, forKey: Keys.altFaceSuffix)
+    }
+    aCoder.encode(cardPadPercent, forKey: Keys.cardPadPercent)
+    aCoder.encode(cardHSpacing, forKey: Keys.cardHSpacing)
+    aCoder.encode(cardVSpacing, forKey: Keys.cardVSpacing)
+    aCoder.encode(cardScale, forKey: Keys.cardScale)
+    aCoder.encode(cardSize, forKey: Keys.cardSize)
+    aCoder.encode(cardsAcross, forKey: Keys.cardsAcross)
+    aCoder.encode(dealerPosition, forKey: Keys.dealerPosition)
+    aCoder.encode(stockLocation, forKey: Keys.stockLocation)
+    aCoder.encode(stockCardBase, forKey: Keys.stockCardBase)
+    aCoder.encode(wasteLocation, forKey: Keys.wasteLocation)
+    aCoder.encode(wasteHorizSpacing, forKey: Keys.wasteHorizSpacing)
+    aCoder.encode(cardAnimSpeed, forKey: Keys.cardAnimSpeed)
+    aCoder.encode(doCardFlipAnim, forKey: Keys.doCardFlipAnim)
+    aCoder.encode(restartStockPile, forKey: Keys.restartStockPile)
+    aCoder.encode(youWinLabel, forKey: Keys.youWinLabel)
+    
+    aCoder.encode(hud, forKey: Keys.hud)
+    aCoder.encode(settingsVolumeTouched, forKey: Keys.settingsVolumeTouched)
+    aCoder.encode(settingsFXTouched, forKey: Keys.settingsFXTouched)
+
+    aCoder.encode(gameState.rawValue, forKey: Keys.gameState)
+    aCoder.encode(priorGameState.rawValue, forKey: Keys.priorGameState)
+    aCoder.encode(canAutoWin, forKey: Keys.canAutoWin)
+    aCoder.encode(firstTouchPos, forKey: Keys.firstTouchPos)
+    aCoder.encode(lastTouchPos, forKey: Keys.lastTouchPos)
+    aCoder.encode(touchStarted, forKey: Keys.touchStarted)
+    if cardTouched != nil {
+      aCoder.encode(cardTouched, forKey: Keys.cardTouched)
+    }
+    
+    // Structure: cardsInMotion
+    if cardsInMotion.cards.count > 0 {
+      aCoder.encode(cardsInMotion.cards, forKey: Keys.CIMcards)
+      if cardsInMotion.fromStack != nil {
+        aCoder.encode(cardsInMotion.fromStack!.rawValue, forKey: Keys.CIMfromStack)
+      }
+      if cardsInMotion.fromStackNo != nil {
+        aCoder.encode(cardsInMotion.fromStackNo!, forKey: Keys.CIMfromStackNo)
+      }
+    } // cardsInMotion
+    
+    // Structure: playerMoves
+    var pMplayerAction = [Int]()
+    var pMcards = [[Card]?]()
+    var pMfromStack = [Int?]()
+    var pMfromStackNo = [Int?]()
+    var pMtoStack = [Int?]()
+    var PMtoStackNo = [Int?]()
+    for playerMove in playerMoves {
+      pMplayerAction.append(playerMove.playerAction.rawValue)
+      pMcards.append(playerMove.cards)
+      pMfromStack.append(playerMove.fromStack?.rawValue)
+      pMfromStackNo.append(playerMove.fromStackNo)
+      pMtoStack.append(playerMove.toStack?.rawValue)
+      PMtoStackNo.append(playerMove.toStackNo)
+    }
+    aCoder.encode(pMplayerAction, forKey: Keys.PMplayerAction)
+    aCoder.encode(pMcards, forKey: Keys.PMcards)
+    aCoder.encode(pMfromStack, forKey: Keys.PMfromStack)
+    aCoder.encode(pMfromStackNo, forKey: Keys.PMfromStackNo)
+    aCoder.encode(pMtoStack, forKey: Keys.PMtoStack)
+    aCoder.encode(PMtoStackNo, forKey: Keys.PMtoStackNo)
+    
+    super.encode(with: aCoder)
+  } // encode
   
-  // MARK: - Init and Setup
-  
-  // Init
+  // MARK: - Init
   required init?(coder aDecoder: NSCoder) {
+    print("init(coder:) -- Card")
+    currentDeck = aDecoder.decodeObject(forKey: Keys.currentDeck) as! CardDeck
+    originalDeck = aDecoder.decodeObject(forKey: Keys.originalDeck) as? CardDeck
+    tableaus = aDecoder.decodeObject(forKey: Keys.tableaus) as! [Tableau]
+    cardFoundations = aDecoder.decodeObject(forKey: Keys.cardFoundations) as! [CardFoundation]
+    wastePile = aDecoder.decodeObject(forKey: Keys.wastePile) as! WastePile
+    feltImage = aDecoder.decodeObject(forKey: Keys.feltImage) as! String
+    cardBackImage = aDecoder.decodeObject(forKey: Keys.cardBackImage) as! String
+    useBigCards = aDecoder.decodeBool(forKey: Keys.useBigCards)
+    print("Use Big Cards: \(useBigCards)")
+    altFaceSuffix = aDecoder.decodeObject(forKey: Keys.altFaceSuffix) as? String
+    cardPadPercent = aDecoder.decodeObject(forKey: Keys.cardPadPercent) as! CGFloat
+    cardHSpacing = aDecoder.decodeObject(forKey: Keys.cardHSpacing) as! CGFloat
+    cardVSpacing = aDecoder.decodeObject(forKey: Keys.cardVSpacing) as! CGFloat
+    cardScale = aDecoder.decodeObject(forKey: Keys.cardScale) as! CGFloat
+    cardSize = aDecoder.decodeCGSize(forKey: Keys.cardSize)
+    cardsAcross = aDecoder.decodeInteger(forKey: Keys.cardsAcross)
+    dealerPosition = aDecoder.decodeCGPoint(forKey: Keys.dealerPosition)
+    stockLocation = aDecoder.decodeCGPoint(forKey: Keys.stockLocation)
+    stockCardBase = aDecoder.decodeObject(forKey: Keys.stockCardBase) as! SKSpriteNode
+    wasteLocation = aDecoder.decodeCGPoint(forKey: Keys.wasteLocation)
+    wasteHorizSpacing = aDecoder.decodeObject(forKey: Keys.wasteHorizSpacing) as! CGFloat
+    cardAnimSpeed = aDecoder.decodeDouble(forKey: Keys.cardAnimSpeed) // as! TimeInterval
+    doCardFlipAnim = aDecoder.decodeBool(forKey: Keys.doCardFlipAnim)
+    restartStockPile = aDecoder.decodeObject(forKey: Keys.restartStockPile) as! SKSpriteNode
+    youWinLabel = aDecoder.decodeObject(forKey: Keys.youWinLabel) as! SKSpriteNode
+
+    hud = aDecoder.decodeObject(forKey: Keys.hud) as! HUD
+    settingsVolumeTouched = aDecoder.decodeBool(forKey: Keys.settingsVolumeTouched)
+    settingsFXTouched = aDecoder.decodeBool(forKey: Keys.settingsFXTouched)
+
+    gameState = GameState(rawValue:
+      aDecoder.decodeInteger(forKey: Keys.gameState))!
+    priorGameState = GameState(rawValue:
+      aDecoder.decodeInteger(forKey: Keys.priorGameState))!
+    canAutoWin = aDecoder.decodeBool(forKey: Keys.canAutoWin)
+    firstTouchPos = aDecoder.decodeCGPoint(forKey: Keys.firstTouchPos)
+    lastTouchPos = aDecoder.decodeCGPoint(forKey: Keys.lastTouchPos)
+    touchStarted = aDecoder.decodeDouble(forKey: Keys.touchStarted) // as! TimeInterval
+    cardTouched = aDecoder.decodeObject(forKey: Keys.cardTouched) as? Card
+    
+    // Structure: cardsInMotion
+    if let cimCards = aDecoder.decodeObject(forKey: Keys.CIMcards) as? [Card] {
+      cardsInMotion.cards = cimCards
+      if aDecoder.containsValue(forKey: Keys.CIMfromStack) {
+        cardsInMotion.fromStack = StackType(rawValue:
+          aDecoder.decodeInteger(forKey: Keys.CIMfromStack))!
+      }
+      if aDecoder.containsValue(forKey: Keys.CIMfromStackNo) {
+        cardsInMotion.fromStackNo = aDecoder.decodeInteger(forKey: Keys.CIMfromStackNo)
+      }
+    }
+    
+    // Structure: playerMoves
+    let pMplayerActionRawValues = aDecoder.decodeObject(forKey: Keys.PMplayerAction) as? [Int]
+    let pMcards = aDecoder.decodeObject(forKey: Keys.PMcards) as? [[Card]?]
+    let pMfromStackRawValues = aDecoder.decodeObject(forKey: Keys.PMfromStack) as? [Int?]
+    let pMfromStackNos = aDecoder.decodeObject(forKey: Keys.PMfromStackNo) as? [Int?]
+    let pMtoStackRawValues = aDecoder.decodeObject(forKey: Keys.PMtoStack) as? [Int?]
+    let pMtoStackNos = aDecoder.decodeObject(forKey: Keys.PMtoStackNo) as? [Int?]
+    if let pMplayerActionRawValues = pMplayerActionRawValues {
+      var playerMove: PlayerMove
+      for i in 0..<pMplayerActionRawValues.count {
+        let pMplayerAction = PlayerAction(rawValue: pMplayerActionRawValues[i])!
+        if let pMcards = pMcards?[i] {
+          let pMfromStack = StackType(rawValue: pMfromStackRawValues![i]!)!
+          let pMtoStack = StackType(rawValue: pMtoStackRawValues![i]!)!
+          playerMove = PlayerMove(
+            playerAction: pMplayerAction,
+            cards: pMcards,
+            fromStack: pMfromStack,
+            fromStackNo: pMfromStackNos?[i],
+            toStack: pMtoStack,
+            toStackNo: pMtoStackNos?[i])
+        } else {
+          playerMove = PlayerMove(playerAction: pMplayerAction)
+        }
+        playerMoves.append(playerMove)
+      } // iterate through player moves
+    } // has history of player moves
+    
     super.init(coder: aDecoder)
-    print("init:coder")
+    
+    addObservers()
+    
+    // Setup sound effect actions
+    let soundFX = SKAction.run {
+      let randSound = self.dealSounds[Int.random(self.dealSounds.count)]
+      self.audioHelper.playSound(name: randSound)
+    }
+    for cardFoundation in cardFoundations {
+      cardFoundation.soundFX = soundFX
+    }
+    for tableau in tableaus {
+      tableau.soundFX = soundFX
+    }
+    wastePile.soundFX = soundFX
+
   } // init:coder
-  
+
   override init(size: CGSize) {
     super.init(size: size)
     print("init:size")
     addObservers()
   }
   
+  // MARK: - Load and Setup
   // Setup scene
   override func didMove(to view: SKView) {
     
     print("Init: Load game data")
     loadGameInitData()
     
+    print("Init: Get card properties from plist")
+    parseCardsData(fromPList: gameInitData)
+    
     print("Init: Get User Defaults")
     getSavedDefaults()
     
-    print("Init: Setup background")
-    setupBackground()
-    
-    print("Init: Setup music")
+    print("Init: Setup audio - based on user defaults")
     setupAudio()
     
-    print("Init: Setup HUD")
-    setupHUD()
+    if !loadFromSave {
+      print("Init: Setup background")
+      setupBackground()
 
-    print("Init: Setup dealer")
-    setupDealer()
+      print("Init: Setup HUD")
+      setupHUD()
+      
+      print("Init: Setup dealer")
+      setupDealer()
     
-    if gameState == .Starting {
-      parseCardsData(fromPList: gameInitData)
-      if let replayDeck = originalDeck {
+      if let replayDeck = originalDeck, gameState == .Starting {
         print("Init: Using previous replay deck")
         currentDeck = replayDeck
       } else {
@@ -185,7 +421,7 @@ class GameScene: SKScene {
         originalDeck = currentDeck.copy()
       }
 
-      print("Init: Setup Cards")
+      print("Init: Setup cards for new game")
       setupCards()
       
       print("Init: Start new game")
@@ -222,13 +458,16 @@ class GameScene: SKScene {
   
   func setupBackground() {
     let background = SKSpriteNode(imageNamed: feltImage)
+    print(" -- background size: \(background.size)")
     let widthScale = size.width / background.size.width
     let heightScale = size.height / background.size.height
     let finalScale = max(widthScale, heightScale)
+    print("\n -- finalScale: \(finalScale)")
     background.setScale(finalScale)
     background.zPosition = -100
     background.name = "Background"
     addChild(background)
+    print(" -- Added Backround: \(background)")
     
     youWinLabel = SKSpriteNode(imageNamed: "YouWinLabel")
     youWinLabel.position = CGPoint.zero
@@ -334,6 +573,12 @@ class GameScene: SKScene {
     if deviceModel == .iPhoneX {
       foundationY -= 30
     }
+    
+    let soundFX = SKAction.run {
+      let randSound = self.dealSounds[Int.random(self.dealSounds.count)]
+      self.audioHelper.playSound(name: randSound)
+    }
+
     print("FoundatationXY: (\(foundationX), \(foundationY)")
     for _ in 0...3 {
       let basePosition = CGPoint(x: foundationX, y: foundationY)
@@ -342,10 +587,6 @@ class GameScene: SKScene {
                              andPosition: basePosition)
       addChild(emptySlot)
       let cardFoundation = CardFoundation(basePosition: basePosition)
-      let randSound = dealSounds[Int.random(dealSounds.count)]
-      let soundFX = SKAction.run {
-        self.audioHelper.playSound(name: randSound)
-      }
       cardFoundation.soundFX = soundFX
       cardFoundations.append(cardFoundation)
       foundationX += cardSize.width + cardHSpacing
@@ -364,10 +605,6 @@ class GameScene: SKScene {
       let newTableau = Tableau(basePosition: basePosition,
                                cardSpacing: cardVSpacing,
                                downSpacing: cardVSpacing / 3)
-      let randSound = dealSounds[Int.random(dealSounds.count)]
-      let soundFX = SKAction.run {
-        self.audioHelper.playSound(name: randSound)
-      }
       newTableau.soundFX = soundFX
       let emptySlot = create(emptySlotSprite: "EmptySlot",
                              withSize: cardSize,
@@ -401,10 +638,6 @@ class GameScene: SKScene {
     let wastePileHSpacing = (cardSize.width - cardHSpacing) / 2
     wastePile = WastePile(basePosition: wasteLocation,
                           cardSpacing: wastePileHSpacing)
-    let randSound = dealSounds[Int.random(dealSounds.count)]
-    let soundFX = SKAction.run {
-      self.audioHelper.playSound(name: randSound)
-    }
     wastePile.soundFX = soundFX
 
   } // setupCards
@@ -501,11 +734,7 @@ class GameScene: SKScene {
     }
     
   } // deal
-  
-  
-  
-  
-  
+    
   
 } // GameScene
 

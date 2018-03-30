@@ -18,14 +18,20 @@ class GameViewController: UIViewController {
     if let view = self.view as! SKView? {
       let scene: GameScene
       if let loadedScene = GameScene.loadGame() {
+        print(" -- Loading from saved scene")
+//        loadedScene.size = view.frame.size
+        loadedScene.loadFromSave = true
         scene = loadedScene
       } else {
+        print(" -- Loading from new game")
         scene = GameScene(size: view.frame.size)
       }
       scene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
       // Set the scale mode to scale to fit the window
       scene.scaleMode = .aspectFill
     
+      print("Scene size: \(scene.size)")
+      
       // Present the scene
       let transition = SKTransition.doorsOpenHorizontal(withDuration: 2)
       view.presentScene(scene, transition: transition)

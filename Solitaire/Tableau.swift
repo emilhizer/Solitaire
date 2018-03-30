@@ -14,8 +14,18 @@ enum PileType: Int {
   case Down
 }
 
-class Tableau {
+class Tableau: NSObject, NSCoding {
   
+  // En/Decoding Keys
+  enum Keys {
+    static var basePosition = "Tableau.basePosition"
+    static var baseZPosition = "Tableau.baseZPosition"
+    static var pileUp = "Tableau.pileUp"
+    static var pileDown = "Tableau.pileDown"
+    static var upCardSpacing = "Tableau.upCardSpacing"
+    static var downCardSpacing = "Tableau.downCardSpacing"
+    static var soundFX = "Tableau.soundFX"
+  } // Keys
   
   // MARK: - Properties
   var basePosition = CGPoint.zero
@@ -38,16 +48,41 @@ class Tableau {
   }
   var upCardSpacing: CGFloat
   var downCardSpacing: CGFloat
-  var zBasePosition = CGFloat(100)
+  var baseZPosition = CGFloat(100)
   
   // Sound effect
   var soundFX: SKAction?
   
-  // MARK: - Init
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
+  // MARK: - Save data
+  func encode(with aCoder: NSCoder) {
+    print("encode -- Tableau")
+    aCoder.encode(basePosition, forKey: Keys.basePosition)
+    aCoder.encode(pileUp, forKey: Keys.pileUp)
+    aCoder.encode(pileDown, forKey: Keys.pileDown)
+    aCoder.encode(upCardSpacing, forKey: Keys.upCardSpacing)
+    aCoder.encode(downCardSpacing, forKey: Keys.downCardSpacing)
+    aCoder.encode(baseZPosition, forKey: Keys.baseZPosition)
+    // Note soundFX is a run-block and may not be encodable
+    //   may need to reapply soundFX at GameScene level back into this object
+    //   when restoring from save (decoding)
+//    if let optionalSoundFX = soundFX {
+//      aCoder.encode(optionalSoundFX, forKey: Keys.soundFX)
+//    }
+    // Not encoding/decoding animations - let's see what happens...
+  } // encode
   
+  // MARK: - Init
+  required init?(coder aDecoder: NSCoder) {
+    print("init(coder:) -- Tableau")
+    basePosition = aDecoder.decodeCGPoint(forKey: Keys.basePosition)
+    pileUp = aDecoder.decodeObject(forKey: Keys.pileUp) as! [Card]
+    pileDown = aDecoder.decodeObject(forKey: Keys.pileDown) as! [Card]
+    upCardSpacing = aDecoder.decodeObject(forKey: Keys.upCardSpacing) as! CGFloat
+    downCardSpacing = aDecoder.decodeObject(forKey: Keys.downCardSpacing) as! CGFloat
+    baseZPosition = aDecoder.decodeObject(forKey: Keys.baseZPosition) as! CGFloat
+//    soundFX = aDecoder.decodeObject(forKey: Keys.soundFX) as? SKAction
+  } // init:coder
+
   init(basePosition: CGPoint, cardSpacing: CGFloat = 0, downSpacing: CGFloat? = nil) {
     self.basePosition = basePosition
     self.upCardSpacing = cardSpacing
@@ -76,8 +111,8 @@ class Tableau {
       finalPosition.y -= cardSpacing
     }
 
-    // Initiall move card to it's final position
-    //   because subequent cards depend upon this cards final position
+    // Initially move card to it's final position
+    //   because subequent cards depend upon this card's final position
     card.position = finalPosition
     
     if card.facing == .Front {
@@ -85,7 +120,7 @@ class Tableau {
     } else {
       pileDown.append(card)
     }
-    let zPositionFinal = zBasePosition + (10 * CGFloat(totalCards))
+    let zPositionFinal = baseZPosition + (10 * CGFloat(totalCards))
 
     // Need to move card (temporarily) back to initial position
     //   so we can animate from initial pos to final pos
@@ -108,7 +143,11 @@ class Tableau {
         self.wiggleCard(card: card, withAnimSpeed: animSpeed)
       }
     }
-    card.run(SKAction.sequence([moveToStart, delayAction, unhideAction, groupMove, runAfter]))
+    card.run(SKAction.sequence([moveToStart,
+                                delayAction,
+                                unhideAction,
+                                groupMove,
+                                runAfter]))
 
   } // add:card
   

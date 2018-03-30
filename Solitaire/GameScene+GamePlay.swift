@@ -250,7 +250,7 @@ extension GameScene {
       animateWinning()
     } else {
       // Check to see if we can autowin
-      if (currentDeck.unusedCards.count == 0) && (wastePile.count <= 1) {
+      if (currentDeck.unusedCards.count == 0) && (wastePile.count == 0) {
         var allTableauCardsUp = true
         for tableau in tableaus {
           if tableau.pileDown.count > 0 {

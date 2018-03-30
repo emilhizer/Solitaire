@@ -12,6 +12,16 @@ import SpriteKit
 
 class WastePile: NSObject, NSCoding {
   
+  // En/Decoding Keys
+  enum Keys {
+    static var basePosition = "WastePile.basePosition"
+    static var baseZPosition = "WastePile.baseZPosition"
+    static var pile = "WastePile.pile"
+    static var spacing = "WastePile.spacing"
+    static var threeUpPositions = "WastePile.threeUpPositions"
+    static var threeUpCards = "WastePile.threeUpCards"
+    static var soundFX = "WastePile.soundFX"
+  } // Keys
   
   // MARK: - Properties
   private var basePosition = CGPoint.zero
@@ -38,24 +48,31 @@ class WastePile: NSObject, NSCoding {
   // MARK: - Save data
   func encode(with aCoder: NSCoder) {
     print("encode -- WastePile")
-    aCoder.encode(basePosition, forKey: "WastePile.basePosition")
-    aCoder.encode(baseZPosition, forKey: "WastePile.baseZPosition")
-    aCoder.encode(pile, forKey: "WastePile.pile")
-    aCoder.encode(spacing, forKey: "WastePile.spacing")
-    aCoder.encode(threeUpPositions, forKey: "WastePile.threeUpPositions")
-    aCoder.encode(threeUpCards, forKey: "WastePile.threeUpCards")
+    aCoder.encode(basePosition, forKey: Keys.basePosition)
+    aCoder.encode(baseZPosition, forKey: Keys.baseZPosition)
+    aCoder.encode(pile, forKey: Keys.pile)
+    aCoder.encode(spacing, forKey: Keys.spacing)
+    aCoder.encode(threeUpPositions, forKey: Keys.threeUpPositions)
+    aCoder.encode(threeUpCards, forKey: Keys.threeUpCards)
+    // Note soundFX is a run-block and may not be encodable
+    //   may need to reapply soundFX at GameScene level back into this object
+    //   when restoring from save (decoding)
+//    if let optionalSoundFX = soundFX {
+//      aCoder.encode(optionalSoundFX, forKey: Keys.soundFX)
+//    }
+    // Not encoding/decoding animations - let's see what happens...
   } // encode
   
   // MARK: - Init
-  required init(coder aDecoder: NSCoder) {
-    print("init(coder:) -- WastPile start")
-    basePosition = aDecoder.decodeObject(forKey: "WastePile.basePosition") as! CGPoint
-    baseZPosition = aDecoder.decodeObject(forKey: "WastePile.baseZPosition") as! CGFloat
-    pile = aDecoder.decodeObject(forKey: "WastePile.pile") as! [Card]
-    spacing = aDecoder.decodeObject(forKey: "WastePile.spacing") as! CGFloat
-    threeUpPositions = aDecoder.decodeObject(forKey: "WastePile.threeUpPositions") as! [CGPoint]
-    threeUpCards = aDecoder.decodeObject(forKey: "WastePile.threeUpCards") as! [Card]
-    print("init(coder:) -- WastPile finish")
+  required init?(coder aDecoder: NSCoder) {
+    print("init(coder:) -- WastPile")
+    basePosition = aDecoder.decodeCGPoint(forKey: Keys.basePosition)
+    baseZPosition = aDecoder.decodeObject(forKey: Keys.baseZPosition) as! CGFloat
+    pile = aDecoder.decodeObject(forKey: Keys.pile) as! [Card]
+    spacing = aDecoder.decodeObject(forKey: Keys.spacing) as! CGFloat
+    threeUpPositions = aDecoder.decodeObject(forKey: Keys.threeUpPositions) as! [CGPoint]
+    threeUpCards = aDecoder.decodeObject(forKey: Keys.threeUpCards) as! [Card]
+//    soundFX = aDecoder.decodeObject(forKey: Keys.soundFX) as? SKAction
   } // init:coder
   
   init(basePosition: CGPoint, cardSpacing spacing: CGFloat) {
