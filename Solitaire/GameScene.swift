@@ -481,7 +481,7 @@ class GameScene: SKScene {
   
   func setupAudio() {
     audioHelper.setupGameSound(name: AudioName.Background,
-                               fileNamed: "BigChill.m4a",
+                               fileNamed: "SpaceBackround.m4a",
                                withVolume: 0,
                                isBackground: true)
     

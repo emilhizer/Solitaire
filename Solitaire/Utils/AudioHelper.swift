@@ -14,8 +14,8 @@ class AudioHelper {
   
   // MARK: - Properties
   enum Constant {
-    static var volumeAdjust: Float = 0.8
-    static var bgVolumeAdjust: Float = 0.4
+    static var volumeAdjust: Float = 0.2 // 0.8 for simulator
+    static var bgVolumeAdjust: Float = 0.05 // 0.4 for simulator
   }
   
   // Singleton
