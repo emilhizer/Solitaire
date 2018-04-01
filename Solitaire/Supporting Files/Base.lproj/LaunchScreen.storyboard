@@ -18,18 +18,23 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Feltr2" translatesAutoresizingMaskIntoConstraints="NO" id="2q9-yG-cAZ">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Feltr2" translatesAutoresizingMaskIntoConstraints="NO" id="bv7-rL-JLb">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" red="0.22537636756896973" green="0.45767837762832642" blue="0.16874814033508301" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="bv7-rL-JLb" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="b1t-Im-QNo"/>
+                            <constraint firstItem="bv7-rL-JLb" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="i9o-YA-QDq"/>
+                            <constraint firstItem="bv7-rL-JLb" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="igP-Fy-Tjc"/>
+                            <constraint firstItem="bv7-rL-JLb" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="sqT-mA-lrG"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="52" y="374.66266866566718"/>
+            <point key="canvasLocation" x="51.5625" y="374.4140625"/>
         </scene>
     </scenes>
     <resources>
